@@ -323,21 +323,6 @@ in-position</property>
           </packing>
         </child>
         <child>
-          <object class="HAL_Button" id="offset_valid">
-            <property name="label" translatable="yes">pause-
-offset-
-enable</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="top_attach">13</property>
-            <property name="bottom_attach">14</property>
-            <property name="y_options"></property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel" id="state">
             <property name="visible">True</property>
             <property name="label" translatable="yes">label</property>
@@ -477,6 +462,21 @@ feed-hold</property>
         </child>
         <child>
           <placeholder/>
+        </child>
+        <child>
+          <object class="HAL_ToggleButton" id="offset_valid">
+            <property name="label" translatable="yes">pause-
+offset-
+enable</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="top_attach">13</property>
+            <property name="bottom_attach">14</property>
+            <property name="y_options"></property>
+          </packing>
         </child>
       </object>
     </child>
