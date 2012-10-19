@@ -2701,5 +2701,3 @@ automatically does 'the right thing' if needed.
   or oword subroutine. This sets the error message and aborts the
   progam. Previously there was no clean way to abort a Python oword
   subroutine.
-
-
