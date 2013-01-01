@@ -134,6 +134,11 @@ If this bit is driven FALSE, motion stops, the machine is placed in the "machine
 When Feed Stop Control is enabled with M53 P1, and this bit is TRUE, the feed rate is set to 0.
 
 .TP
+\fBmotion.ferror-mode\fR IN U32
+If 0, compute determine if a joint following condition exists based on the last
+commanded position. If 1, determine following error based on new commanded position.
+
+.TP
 \fBmotion.motion-inpos\fR OUT BIT 
 TRUE if the machine is in position.
 
