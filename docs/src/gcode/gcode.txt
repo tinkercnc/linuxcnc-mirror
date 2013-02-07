@@ -1063,6 +1063,12 @@ If supplied, the D word is the tool number to use.  This would normally
 be the number of the tool in the spindle (in which case the D word is
 redundant and need not be supplied), but it may be any valid tool number.
 
+[NOTE]
+D0 enables cutter compensation for the tool currently in the spindle,
+not for tool 0!  Tool 0 is usually used to mean "no tool", so enabling
+cutter comp for T0 is usually the same as disabling cutter comp (see
+<<sec:G40,G40>>).
+
 To start cutter compensation to the left of the part profile, use G41.
 G41 starts cutter compensation to the left of the programmed line
 as viewed from the positive end of the axis perpendicular to the plane.
