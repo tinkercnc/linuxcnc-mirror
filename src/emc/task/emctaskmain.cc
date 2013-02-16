@@ -778,7 +778,7 @@ static int emcTaskPlan(void)
 
     // check for new command
     if (emcCommand->serial_number != emcStatus->echo_serial_number) {
-	// flag it here locally as a new command
+        // type != 0 means "we're processing a new command"
 	type = emcCommand->type;
     } else {
 	// no new command-- reset local flag
@@ -1319,24 +1319,70 @@ static int emcTaskPlan(void)
 
 	case EMC_TASK_MODE_MDI:	// ON, MDI
 
-	    if (emcStatus->task.interpState == EMC_TASK_INTERP_IDLE &&
-		// emcCommand == NULL &&
-		mdi_input_queue.len() > 0) {
-		// MDI done, and queued command(s) remaining:
-		EMC_TASK_PLAN_EXECUTE *mdicmd = (EMC_TASK_PLAN_EXECUTE *) mdi_input_queue.get();
-		if (mdicmd) {
-		    emcCommand = mdicmd;
-		    type = emcCommand->type;
-		    if (emc_debug & EMC_DEBUG_TASK_ISSUE)
-			rcs_print("emcTaskPlan: MDI: dequeueing '%s' (remaining: %d)\n",
-				  mdicmd->command, mdi_input_queue.len());
-		} else {
-		    rcs_print_error("emcTaskPlan: MDI: dequeueing NULL command? (remaining: %d)\n",
-				    mdi_input_queue.len());
-		    type = 0;
-		}
-	    } else
-		emcCommand = emcCommandBuffer->get_address();
+            if (type == EMC_TASK_PLAN_EXECUTE_TYPE) {
+                // we got an MDI command!
+                if (
+                    (emcStatus->task.interpState != EMC_TASK_INTERP_IDLE)
+                    || (mdi_input_queue.len() > 0)
+                ) {
+                    // we got a new MDI command but we can't run it right
+                    // now, we need to queue it
+		    if (mdi_input_queue.len() < max_mdi_queued_commands) {
+			mdi_input_queue.append(emcCommand);
+			emcStatus->task.queuedMDIcommands = mdi_input_queue.len();
+			if (emc_debug & EMC_DEBUG_TASK_ISSUE) {
+			    rcs_print("task: MDI: queued '%s' (queue len=%d)\n",
+				      ((EMC_TASK_PLAN_EXECUTE*)emcCommand)->command,mdi_input_queue.len());
+			}
+		    } else {
+			emcOperatorError(0, _("maximum number of queued MDI commands exceeded (%d)"),
+					 max_mdi_queued_commands);
+		    }
+                    // We handled the incoming command by either queueing
+                    // it or dropping it, in any case it doesn't need any
+                    // more attention right now.
+                    type = 0;
+                } else {
+                    // we got a new MDI command, the interpreter is idle,
+                    // and there's nothing queued, so just fall through and
+                    // run it now
+                }
+            }
+
+            if (type == 0) {
+                // We don't have any new command to deal with, see if we
+                // should pull one out of the queue.
+                if (
+                    (emcStatus->task.interpState == EMC_TASK_INTERP_IDLE)
+                    && (mdi_input_queue.len() > 0)
+                ) {
+                    EMC_TASK_PLAN_EXECUTE *mdicmd = (EMC_TASK_PLAN_EXECUTE *)mdi_input_queue.get();
+                    if (mdicmd) {
+                        emcCommand = mdicmd;
+                        type = emcCommand->type;
+                        if (emc_debug & EMC_DEBUG_TASK_ISSUE)
+                            rcs_print("emcTaskPlan: MDI: dequeueing '%s' (serial_number %d, remaining: %d)\n",
+                                      mdicmd->command, mdicmd->serial_number, mdi_input_queue.len());
+                    } else {
+                        rcs_print_error("emcTaskPlan: MDI: dequeueing NULL command? (remaining: %d)\n",
+                                        mdi_input_queue.len());
+                    }
+                }
+            }
+
+            //
+            // When we get here, one of these three conditions is true:
+            //
+            // 1.  type == 0, meaning "there's no command to process", or
+            //
+            // 2.  type is some non-MDI value and emcCommand is the
+            //     corresponding command that needs attention, or
+            //
+            // 3.  type is MDI (EMC_TASK_PLAN_EXECUTE_TYPE) and emcCommand
+            //     is the MDI command to issue right now, on this
+            //     invocation of emcTaskPlan().
+            //
+
 	    emcStatus->task.queuedMDIcommands = mdi_input_queue.len();
 
 	    switch (type) {
@@ -1397,26 +1443,16 @@ static int emcTaskPlan(void)
 		break;
 
 	    case EMC_TASK_PLAN_EXECUTE_TYPE:
-		// in MDI, and a command currently executing.
-		if (emcStatus->task.interpState != EMC_TASK_INTERP_IDLE) {
-		    // in MDI, and a command currently executing.
-		    if (mdi_input_queue.len() < max_mdi_queued_commands) {
-			// space left to queue it.
-			mdi_input_queue.append(emcCommand);
-			emcStatus->task.queuedMDIcommands = mdi_input_queue.len();
-			if (emc_debug & EMC_DEBUG_TASK_ISSUE) {
-			    rcs_print("MDI: queueing '%s' (queue len=%d)\n",
-				      execute_msg->command,mdi_input_queue.len());
-			}
-		    } else {
-			emcOperatorError(0, _("maximum number of queued MDI commands exceeded (%d)"),
-					 max_mdi_queued_commands);
-		    }
-		} else {
-		    emcStatus->task.queuedMDIcommands = 0;
-		    // MDI input queue empty. Go ahead and issue right away.
+                if (emcStatus->task.interpState == EMC_TASK_INTERP_IDLE) {
 		    retval = emcTaskIssueCommand(emcCommand);
-		}
+                    // This might have been a command that came off the MDI
+                    // queue, in which case its serial number is too old.
+                    // So reset the emcCommand to the last command received
+                    // on the NML Command channel.
+                    emcCommand = emcCommandBuffer->get_address();
+                } else {
+                    rcs_print_error("emcTaskPlan: got an MDI command to handle, but the interpreter is not idle!\n");
+                }
 		break;
 
 	    case EMC_TOOL_LOAD_TOOL_TABLE_TYPE:
