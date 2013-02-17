@@ -776,13 +776,27 @@ static int emcTaskPlan(void)
     NMLTYPE type;
     int retval = 0;
 
+    printf(
+        "emcTaskPlan starting, interp is %s, serial %d/%d, mdi queue %d\n",
+	emcStatus->task.interpState == EMC_TASK_INTERP_IDLE ? "Idle" :
+	emcStatus->task.interpState == EMC_TASK_INTERP_READING ? "Reading" :
+	emcStatus->task.interpState == EMC_TASK_INTERP_PAUSED ? "Paused" :
+	emcStatus->task.interpState == EMC_TASK_INTERP_WAITING ? "Waiting" : "Unknown",
+        emcCommand->serial_number,
+        emcStatus->echo_serial_number,
+        mdi_input_queue.len()
+    );
+    fflush(NULL);
+
     // check for new command
     if (emcCommand->serial_number != emcStatus->echo_serial_number) {
 	// flag it here locally as a new command
 	type = emcCommand->type;
+        printf("task: emcTaskPlan found a new command (serial number %d)\n", emcCommand->serial_number);
     } else {
 	// no new command-- reset local flag
 	type = 0;
+        printf("task: emcTaskPlan no new command (still on serial number %d)\n", emcStatus->echo_serial_number);
     }
 
     // handle any new command
@@ -3301,6 +3315,19 @@ int main(int argc, char *argv[])
 	if (0 != emcTaskPlan()) {
 	    taskPlanError = 1;
 	}
+
+        printf(
+            "emcTaskPlan returned, interp is %s, serial %d/%d, mdi queue %d\n",
+            emcStatus->task.interpState == EMC_TASK_INTERP_IDLE ? "Idle" :
+            emcStatus->task.interpState == EMC_TASK_INTERP_READING ? "Reading" :
+            emcStatus->task.interpState == EMC_TASK_INTERP_PAUSED ? "Paused" :
+            emcStatus->task.interpState == EMC_TASK_INTERP_WAITING ? "Waiting" : "Unknown",
+            emcCommand->serial_number,
+            emcStatus->echo_serial_number,
+            mdi_input_queue.len()
+        );
+        fflush(NULL);
+
 	if (0 != emcTaskExecute()) {
 	    taskExecuteError = 1;
 	}
@@ -3426,6 +3453,9 @@ int main(int argc, char *argv[])
 	// do top level
 	emcStatus->command_type = emcCommand->type;
 	emcStatus->echo_serial_number = emcCommand->serial_number;
+
+        printf("task: echo_serial_number set to %d\n", emcCommand->serial_number);
+        fflush(NULL);
 
 	if (taskPlanError || taskExecuteError ||
 	    emcStatus->task.execState == EMC_TASK_EXEC_ERROR ||
