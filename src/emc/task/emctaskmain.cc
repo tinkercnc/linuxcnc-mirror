@@ -97,6 +97,7 @@ static RCS_STAT_CHANNEL *emcStatusBuffer = 0;
 static NML *emcErrorBuffer = 0;
 
 // NML command channel data pointer
+static RCS_CMD_MSG *emcCommand_buffer_address = 0;
 static RCS_CMD_MSG *emcCommand = 0;
 
 // global EMC status
@@ -776,7 +777,8 @@ static int emcTaskPlan(void)
     NMLTYPE type;
     int retval = 0;
 
-    // check for new command
+    // check for new command in the NML Command buffer
+    emcCommand = emcCommand_buffer_address;
     if (emcCommand->serial_number != emcStatus->echo_serial_number) {
 	// flag it here locally as a new command
 	type = emcCommand->type;
@@ -2843,7 +2845,8 @@ static int emctask_startup()
 	return -1;
     }
     // get our command data structure
-    emcCommand = emcCommandBuffer->get_address();
+    emcCommand_buffer_address = emcCommandBuffer->get_address();
+    emcCommand = emcCommand_buffer_address;
 
     // get the NML status buffer
     if (!(emc_debug & EMC_DEBUG_NML)) {
@@ -3419,13 +3422,18 @@ int main(int argc, char *argv[])
 	// handle RCS_STAT_MSG base class members explicitly, since this
 	// is not an NML_MODULE and they won't be set automatically
 
-	// do task
-	emcStatus->task.command_type = emcCommand->type;
-	emcStatus->task.echo_serial_number = emcCommand->serial_number;
+        if (emcCommand == emcCommand_buffer_address) {
+            // we're processing a newly arrived command, not an old command
+            // out of the NML buffer
 
-	// do top level
-	emcStatus->command_type = emcCommand->type;
-	emcStatus->echo_serial_number = emcCommand->serial_number;
+            // do task
+            emcStatus->task.command_type = emcCommand->type;
+            emcStatus->task.echo_serial_number = emcCommand->serial_number;
+
+            // do top level
+            emcStatus->command_type = emcCommand->type;
+            emcStatus->echo_serial_number = emcCommand->serial_number;
+        }
 
 	if (taskPlanError || taskExecuteError ||
 	    emcStatus->task.execState == EMC_TASK_EXEC_ERROR ||
