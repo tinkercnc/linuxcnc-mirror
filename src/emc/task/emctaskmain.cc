@@ -394,6 +394,51 @@ static int mdi_execute_wait = 0;
 // Side queue to store MDI commands
 static NML_INTERP_LIST mdi_execute_queue;
 
+static const char *task_exec_state_to_str(void) {
+    switch (emcStatus->task.execState) {
+        case EMC_TASK_EXEC_ERROR: return "Error";
+        case EMC_TASK_EXEC_DONE: return "Done";
+        case EMC_TASK_EXEC_WAITING_FOR_MOTION: return "WaitingForMotion";
+        case EMC_TASK_EXEC_WAITING_FOR_MOTION_QUEUE: return "WaitingForMotionQueue";
+        case EMC_TASK_EXEC_WAITING_FOR_IO: return "WaitingForIO";
+        case EMC_TASK_EXEC_WAITING_FOR_PAUSE: return "WaitingForPause";
+        case EMC_TASK_EXEC_WAITING_FOR_MOTION_AND_IO: return "WaitingForMotionAndIO";
+        case EMC_TASK_EXEC_WAITING_FOR_DELAY: return "WaitingForDelay";
+        case EMC_TASK_EXEC_WAITING_FOR_SYSTEM_CMD: return "WaitingForSystemCmd";
+    }
+    return "Unknown";
+}
+
+static inline void Introspect_queues(void) {
+    printf("    interp_list:\n");
+    interp_list.print();
+    printf("    mdi_execute_queue:\n");
+    mdi_execute_queue.print();
+    fflush(NULL);
+}
+
+static inline void Introspect(const char *prefix) {
+    printf(
+        "task: %s, task is %s, interp is %s, serial %d/%d, interp_list.len()=%d, emcTaskCommand=%s, mdi_execute_wait=%d, mdi_execute_next=%d, mdi_execute_queue.len()=%d\n",
+        prefix,
+        task_exec_state_to_str(),
+        emcStatus->task.interpState == EMC_TASK_INTERP_IDLE ? "Idle" :
+        emcStatus->task.interpState == EMC_TASK_INTERP_READING ? "Reading" :
+        emcStatus->task.interpState == EMC_TASK_INTERP_PAUSED ? "Paused" :
+        emcStatus->task.interpState == EMC_TASK_INTERP_WAITING ? "Waiting" : "Unknown",
+        emcCommand->serial_number,
+        emcStatus->echo_serial_number,
+        interp_list.len(),
+        (emcTaskCommand ? emc_symbol_lookup(emcTaskCommand->type) : "(none)"),
+        mdi_execute_wait,
+        mdi_execute_next,
+        mdi_execute_queue.len()
+    );
+    fflush(NULL);
+}
+
+
+
 /*
   checkInterpList(NML_INTERP_LIST *il, EMC_STAT *stat) takes a pointer
   to an interpreter list and a pointer to the EMC status, pops each NML
@@ -643,6 +688,8 @@ static void mdi_execute_abort(void)
 
 static void mdi_execute_hook(void)
 {
+    Introspect("mdi_execute_hook() starting");
+
     if (mdi_execute_wait && emcTaskPlanIsWait()) {
 	// delay reading of next line until all is done
 	if (interp_list.len() == 0 &&
@@ -658,6 +705,7 @@ static void mdi_execute_hook(void)
 
     if (mdi_execute_level < 0 && !mdi_execute_wait && mdi_execute_queue.len()) {
 	interp_list.append(mdi_execute_queue.get());
+        printf("task: mdi_execute_hook() appended the next queued mdi command to interp_list (%d commands in interp_list, %d more MDI commands queued)\n", interp_list.len(), mdi_execute_queue.len());
 	return;
     }
 
@@ -670,6 +718,7 @@ static void mdi_execute_hook(void)
     EMC_TASK_PLAN_EXECUTE msg;
     msg.command[0] = (char) 0xff;
 
+    printf("task: mdi_execute_hook() appending 0xff to interp's list\n");
     interp_list.append(msg);
 }
 
@@ -713,13 +762,18 @@ static int emcTaskPlan(void)
     NMLTYPE type;
     int retval = 0;
 
+    Introspect("emcTaskPlan starting");
+    Introspect_queues();
+
     // check for new command
     if (emcCommand->serial_number != emcStatus->echo_serial_number) {
 	// flag it here locally as a new command
 	type = emcCommand->type;
+        printf("task: emcTaskPlan found a new command (serial number %d)\n", emcCommand->serial_number);
     } else {
 	// no new command-- reset local flag
 	type = 0;
+        printf("task: emcTaskPlan no new command (still on serial number %d)\n", emcStatus->echo_serial_number);
     }
 
     // handle any new command
@@ -1310,12 +1364,16 @@ static int emcTaskPlan(void)
                 // in interp_list, then this new incoming MDI command
                 // can just be issued directly.  Otherwise we need to
                 // queue it and deal with it later.
+                printf("task: emcTaskPlan(): incoming mdi command\n");
                 if ((mdi_execute_queue.len() == 0) && (interp_list.len() == 0)) {
+                    printf("task: emcTaskPlan(): mdi queue and interp_list are both empty, issuing MDI command\n");
                     retval = emcTaskIssueCommand(emcCommand);
                 } else {
+                    printf("task: emcTaskPlan(): putting MDI command on mdi queue\n");
                     mdi_execute_queue.append(emcCommand);
                     retval = 0;
                 }
+                fflush(NULL);
                 break;
 
 	    case EMC_TOOL_LOAD_TOOL_TABLE_TYPE:
@@ -1493,6 +1551,7 @@ int emcTaskQueueCommand(NMLmsg * cmd)
 	return 0;
     }
 
+    printf("task: emcTaskQueueCommand() appending a command to interp's list\n");
     interp_list.append(cmd);
 
     return 0;
@@ -1511,7 +1570,7 @@ static int emcTaskIssueCommand(NMLmsg * cmd)
 	return 0;
     }
     if (EMC_DEBUG & EMC_DEBUG_TASK_ISSUE) {
-	rcs_print("Issuing %s -- \t (%s)\n", emcSymbolLookup(cmd->type),
+	rcs_print("task: emcTaskIssueCommand got %s (%s)\n", emcSymbolLookup(cmd->type),
 		  emcCommandBuffer->msg2str(cmd));
     }
     switch (cmd->type) {
@@ -2020,6 +2079,7 @@ static int emcTaskIssueCommand(NMLmsg * cmd)
 	stepping = 0;
 	steppingWait = 0;
 	execute_msg = (EMC_TASK_PLAN_EXECUTE *) cmd;
+        printf("task: emcTaskIssueCommand handling MDI\n");
         if (!all_homed() && !no_force_homing) { //!no_force_homing = force homing before MDI
             emcOperatorError(0, _("Can't issue MDI command when not homed"));
             retval = -1;
@@ -2036,6 +2096,8 @@ static int emcTaskIssueCommand(NMLmsg * cmd)
 		// Empty command recieved. Consider it is NULL
 		command = NULL;
 	    }
+
+            printf("task: emcTaskIssueCommand() running command '%s' now\n", command);
 
 	    int level = emcTaskPlanLevel();
 	    if (emcStatus->task.mode == EMC_TASK_MODE_MDI) {
@@ -2307,6 +2369,9 @@ static int emcTaskExecute(void)
     int status;			// status of child from EMC_SYSTEM_CMD
     pid_t pid;			// pid returned from waitpid()
 
+    printf("task: emcTaskExecute() starting\n");
+    fflush(NULL);
+
     // first check for an abandoned system command and abort it
     if (emcSystemCmdPid != 0 &&
 	emcStatus->task.execState !=
@@ -2367,6 +2432,10 @@ static int emcTaskExecute(void)
 	    if (0 == emcTaskCommand) {
 		// need a new command
 		emcTaskCommand = interp_list.get();
+
+                printf("task: emcTaskExecute() got a command from interp_list: %s (%d commands still on list)\n", emcTaskCommand ? emc_symbol_lookup(emcTaskCommand->type) : "(null)", interp_list.len());
+                fflush(NULL);
+
 		// interp_list now has line number associated with this-- get
 		// it
 		if (0 != emcTaskCommand) {
@@ -2385,6 +2454,9 @@ static int emcTaskExecute(void)
 		    }
 		}
 	    } else {
+                printf("task: emcTaskExecute() issuing current command %s (%d commands on list)\n", emcTaskCommand ? emc_symbol_lookup(emcTaskCommand->type) : "(null)", interp_list.len());
+                fflush(NULL);
+
 		// have an outstanding command
 		if (0 != emcTaskIssueCommand(emcTaskCommand)) {
 		    emcStatus->task.execState = EMC_TASK_EXEC_ERROR;
@@ -3071,12 +3143,19 @@ int main(int argc, char *argv[])
 	    taskExecuteError = 0;
 	}
 	// run control cycle
+        printf("task: calling emcTaskPlan\n");
+        fflush(NULL);
 	if (0 != emcTaskPlan()) {
 	    taskPlanError = 1;
 	}
+        Introspect("emcTaskPlan returned");
+
+        printf("task: calling emcTaskExecute\n");
+        fflush(NULL);
 	if (0 != emcTaskExecute()) {
 	    taskExecuteError = 1;
 	}
+        Introspect("emcTaskExecute returned");
 	// update subordinate status
 
 	emcIoUpdate(&emcStatus->io);
@@ -3158,6 +3237,9 @@ int main(int argc, char *argv[])
 	// do top level
 	emcStatus->command_type = emcCommand->type;
 	emcStatus->echo_serial_number = emcCommand->serial_number;
+
+        printf("task: echo_serial_number set to %d\n", emcCommand->serial_number);
+        fflush(NULL);
 
 	if (taskPlanError || taskExecuteError ||
 	    emcStatus->task.execState == EMC_TASK_EXEC_ERROR ||

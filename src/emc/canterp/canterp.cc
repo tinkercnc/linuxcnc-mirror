@@ -484,6 +484,9 @@ int emcTaskPlanExecute(const char *command)
     int i1, ln=-1;
     char s1[256];
 
+    printf("canterp: emcTaskPlanExecute running '%s'\n", command);
+    fflush(NULL);
+
     if (command) {
 	retval = canterp_parse((char *) command);
 	if (retval)

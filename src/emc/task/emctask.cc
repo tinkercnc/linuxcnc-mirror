@@ -541,6 +541,7 @@ int emcTaskPlanExecute(const char *command)
 
 int emcTaskPlanExecute(const char *command, int line_number)
 {
+    printf("task: emcTaskPlanExecute passing '%s' to interp\n", command);
     int retval = interp.execute(command, line_number);
     if (retval > INTERP_MIN_ERROR) {
 	print_interp_error(retval);

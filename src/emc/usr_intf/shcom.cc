@@ -1125,6 +1125,12 @@ int sendMdiCmd(const char *mdi)
 
     strcpy(emc_task_plan_execute_msg.command, mdi);
     emc_task_plan_execute_msg.serial_number = ++emcCommandSerialNumber;
+    printf(
+        "sendMdiCmd: sending EMC_TASK_PLAN_EXECUTE(command='%s', serial_number=%d)\n",
+        emc_task_plan_execute_msg.command,
+        emc_task_plan_execute_msg.serial_number
+    );
+    fflush(NULL);
     emcCommandBuffer->write(emc_task_plan_execute_msg);
     if (emcWaitType == EMC_WAIT_RECEIVED) {
 	return emcCommandWaitReceived(emcCommandSerialNumber);
