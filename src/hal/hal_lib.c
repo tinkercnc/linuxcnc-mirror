@@ -3367,10 +3367,9 @@ static hal_ring_t *find_ring_by_name(const char *name)
 /***********************************************************************
 *                     Public HAL ring functions                        *
 ************************************************************************/
-
 void walk_rings(const char *where)
 {
-#ifdef RINGDEBUG
+#ifdef ULAPI
     int next;
     hal_ring_t *rbdesc;
     printf("place: %s\n", where);
@@ -3491,6 +3490,9 @@ int hal_ring_attach(const char *name, ringbuffer_t *rbptr, int module_id)
     if ((rbdesc = find_ring_by_name(name)) == NULL) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"hal_ring_attach: no such ring '%s'\n",	name);
+#ifdef ULAPI
+	walk_rings("post hal_ring_attach failure");
+#endif
 	return -EINVAL;
     }
 
@@ -3506,7 +3508,7 @@ int hal_ring_attach(const char *name, ringbuffer_t *rbptr, int module_id)
 // this invalidates a reference obtained by hal_ring_attach()
 // once refcount of the underlying RTAPI ring reaches zero, 
 // the HAL ring struct is deleted as well
-int hal_ring_detach(const char *name)
+int hal_ring_detach(const char *name, int module_id)
 {
     hal_ring_t *rbdesc __attribute__((cleanup(halpr_autorelease_mutex)));
     int next,*prev;
@@ -3532,15 +3534,15 @@ int hal_ring_detach(const char *name)
 	rbdesc = SHMPTR(next);
 	if (strcmp(rbdesc->name, name) == 0) {
 	    // reduces RTAPI refcount in ring_data
-	    if ((retval = rtapi_ring_detach(rbdesc->ring_id, rbdesc->owner))) {
+	    if ((retval = rtapi_ring_detach(rbdesc->ring_id, module_id))) {
 		rtapi_print_msg(RTAPI_MSG_ERR,
 				"hal_ring_detach(%s): rtapi_ring_detach failed %d/%d\n",
-				rbdesc->name, rbdesc->ring_id, rbdesc->owner);
+				rbdesc->name, rbdesc->ring_id, module_id);
 		return retval;
 	    }
 	    // delete the HAL name only once the RTAPI ring becomes
 	    // inaccessible
-	    if (rtapi_ring_refcount(rbdesc->ring_id) < 0) {
+	    if (rtapi_ring_refcount(rbdesc->ring_id) < 1) {
 		// the RTAPI ring structure has been freed, so free corresponding
 		// HAL ring structure as well.
 		rtapi_print_msg(RTAPI_MSG_DBG,
@@ -4998,28 +5000,27 @@ EXPORT_SYMBOL(hal_ring_new);
 EXPORT_SYMBOL(hal_ring_detach);
 EXPORT_SYMBOL(hal_ring_attach);
 
-EXPORT_SYMBOL(hal_ring_use_wmutex);
-EXPORT_SYMBOL(hal_ring_use_rmutex);
+/* EXPORT_SYMBOL(hal_ring_use_wmutex); */
+/* EXPORT_SYMBOL(hal_ring_use_rmutex); */
 
-EXPORT_SYMBOL(hal_record_write);
-EXPORT_SYMBOL(hal_record_next);
-EXPORT_SYMBOL(hal_record_next_size);
-EXPORT_SYMBOL(hal_record_next_vec);
-EXPORT_SYMBOL(hal_record_shift);
-EXPORT_SYMBOL(hal_record_write_space);
-EXPORT_SYMBOL(hal_record_flush);
+/* EXPORT_SYMBOL(hal_record_write); */
+/* EXPORT_SYMBOL(hal_record_next); */
+/* EXPORT_SYMBOL(hal_record_next_size); */
+/* EXPORT_SYMBOL(hal_record_shift); */
+/* EXPORT_SYMBOL(hal_record_write_space); */
+/* EXPORT_SYMBOL(hal_record_flush); */
 
 
-EXPORT_SYMBOL(hal_stream_get_read_vector);
-EXPORT_SYMBOL(hal_stream_get_write_vector);
-EXPORT_SYMBOL(hal_stream_read);
-EXPORT_SYMBOL(hal_stream_peek);
-EXPORT_SYMBOL(hal_stream_read_advance);
-EXPORT_SYMBOL(hal_stream_read_space);
-EXPORT_SYMBOL(hal_stream_flush);
-EXPORT_SYMBOL(hal_stream_write);
-EXPORT_SYMBOL(hal_stream_write_advance);
-EXPORT_SYMBOL(hal_stream_write_space);
+/* EXPORT_SYMBOL(hal_stream_get_read_vector); */
+/* EXPORT_SYMBOL(hal_stream_get_write_vector); */
+/* EXPORT_SYMBOL(hal_stream_read); */
+/* EXPORT_SYMBOL(hal_stream_peek); */
+/* EXPORT_SYMBOL(hal_stream_read_advance); */
+/* EXPORT_SYMBOL(hal_stream_read_space); */
+/* EXPORT_SYMBOL(hal_stream_flush); */
+/* EXPORT_SYMBOL(hal_stream_write); */
+/* EXPORT_SYMBOL(hal_stream_write_advance); */
+/* EXPORT_SYMBOL(hal_stream_write_space); */
 
 #endif /* rtapi */
 

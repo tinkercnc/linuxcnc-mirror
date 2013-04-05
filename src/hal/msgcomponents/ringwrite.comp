@@ -33,10 +33,10 @@ FUNCTION(_) {
 	sent++;
 
 	if (rb.header->is_stream) {
-	    if (hal_stream_write(&rb, buffer, length) != length)
+	    if (rtapi_stream_write(&rb, buffer, length) != length)
 		overrun++;
 	} else {
-	    if (hal_record_write(&rb, buffer, length))
+	    if (rtapi_record_write(&rb, buffer, length))
 		overrun++;
 	}
 	write_prev = write;
@@ -79,7 +79,7 @@ void rtapi_app_exit(void)
 {
     int retval;
 
-    if ((retval = hal_ring_detach(ring))) 
+    if ((retval = hal_ring_detach(ring, comp_id))) 
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"%s: ERROR: hal_ring_detach(%s) failed: %d\n",
 			name, ring, retval);
