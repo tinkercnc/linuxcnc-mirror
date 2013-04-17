@@ -1,24 +1,26 @@
 /********************************************************************
-* Description:  rtapi_main.c
-*
-*               This file, 'rtapi_main.c', implements the RTAPI
-*               rtapi_app_main() and rtapi_app_exit() functions
-*               for userspace thread systems.
-*
-*               It should not be used for kernel thread systems.
-*
-********************************************************************/
+ * Description:  rtapi_main.c
+ *
+ *               This file, 'rtapi_main.c', implements the RTAPI
+ *               rtapi_app_main() and rtapi_app_exit() functions
+ *               for userspace thread systems.
+ *
+ *               It should not be used for kernel thread systems.
+ *
+ ********************************************************************/
 
 #include "config.h"
 #include "rtapi.h"
+#include "rtapi_common.h"
 #include "rtapi_support.h"
 #include "rtapi/shmdrv/shmdrv.h"
 
-#include <sys/ipc.h>		/* IPC_* */
-#include <sys/shm.h>		/* shmget() */
-#include <stdlib.h>		/* rand_r() */
-#include <unistd.h>		/* getuid(), getgid(), sysconf(),
-				   ssize_t, _SC_PAGESIZE */
+#include <unistd.h>		/* ssize_t, _SC_PAGESIZE */
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h> 
 
 #include "rtapi.h"		/* RTAPI realtime OS API */
 #include "rtapi_app.h"		/* RTAPI realtime module decls */
@@ -57,46 +59,47 @@ EXPORT_SYMBOL(get_global_handle);
 
 int rtapi_app_main(void)
 {
-    struct shm_status sm;
     int retval, compatible;
+    int globalkey = OS_KEY(GLOBAL_KEY, rtapi_instance);
+    int rtapikey = OS_KEY(RTAPI_KEY, rtapi_instance);
+
+    page_size = sysconf(_SC_PAGESIZE);
+    shmdrv_loaded  = shmdrv_available();
 
     rtapi_print_msg(RTAPI_MSG_DBG,"RTAPI:%d %s %s init\n",
 		    rtapi_instance,
 		    rtapi_get_handle()->thread_flavor_name,
 		    GIT_VERSION);
 
-    sm.driver_fd = shmdrv_driver_fd();
-    sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
-    sm.size = sizeof(global_data_t);
-    sm.flags = 0;
-    if ((retval = shmdrv_create(&sm)) < 0) {
+    retval = shm_common_new(globalkey, sizeof(global_data_t), 
+			    rtapi_instance, (void **) &global_data, 1);
+    if (retval ==  0) {
+	// the global_data segment already existed.
 	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: can create global segment: %d\n",
-			rtapi_instance, retval);
-	return -EINVAL;
+			"RTAPI:%d ERROR: global segment 0x%x already exists!\n",
+			rtapi_instance, globalkey);
+	return -EBUSY;
     }
-    if ((retval = shmdrv_attach(&sm, (void **)&global_data)) < 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: can attach global segment: %d\n",
-			rtapi_instance, retval);
-	return -EINVAL;
+    if (retval < 0) {
+	 rtapi_print_msg(RTAPI_MSG_ERR,
+			 "RTAPI:%d ERROR: shm_common_new() failed key=0x%x %s\n",
+			 rtapi_instance, globalkey, strerror(-retval));
+	 return retval;
     }
-
-    sm.driver_fd = shmdrv_driver_fd();
-    sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
-    sm.size = sizeof(rtapi_data_t);
-    sm.flags = 0;
-    if ((retval = shmdrv_create(&sm)) < 0) {
+    retval = shm_common_new(rtapikey, sizeof(rtapi_data_t), 
+			    rtapi_instance, (void **) &rtapi_data, 1);
+   if (retval ==  0) {
+	// the rtapi_data segment already existed.
 	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: can create rtapi segment: %d\n",
-			rtapi_instance, retval);
-	return -EINVAL;
+			"RTAPI:%d ERROR: rtapi segment 0x%x already exists!\n",
+			rtapi_instance, rtapikey);
+	return -EBUSY;
     }
-    if ((retval = shmdrv_attach(&sm, (void **)&rtapi_data)) < 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: cant attach rtapi segment: %d\n",
-			rtapi_instance, retval);
-	return -EINVAL;
+    if (retval < 0) {
+	 rtapi_print_msg(RTAPI_MSG_ERR,
+			 "RTAPI:%d ERROR: shm_common_new() failed key=0x%x %s\n",
+			 rtapi_instance, rtapikey, strerror(-retval));
+	 return retval;
     }
 
     /* perform a global init */
@@ -107,63 +110,49 @@ int rtapi_app_main(void)
 
     compatible = check_compatible();
     if (!compatible) {
-	// detach and fail
-	sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
-	sm.size = sizeof(global_data_t);
-	sm.flags = 0;
-	if ((retval = shmdrv_detach(&sm, rtapi_data)) < 0) {
+	if ((retval = shm_common_detach(sizeof(global_data_t), global_data)) != 0) {
 	    rtapi_print_msg(RTAPI_MSG_ERR,
-			    "RTAPI:%d ERROR: shmdrv_detach(rtapi_data) returns %d\n",
-			    rtapi_instance, retval);
-	}
-	rtapi_data = NULL;
-	sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
-	sm.size = sizeof(global_data_t);
-	sm.flags = 0;
-	if ((retval = shmdrv_detach(&sm, global_data)) < 0) {
-	    rtapi_print_msg(RTAPI_MSG_ERR,
-			    "INSTANCE:%d ERROR: shmdrv_detach() returns %d\n",
-			    rtapi_instance, retval);
+			    "RTAPI:%d ERROR: shm_common_detach(0x8.8%x) failed: %s\n",
+			    rtapi_instance, globalkey, strerror(-retval));
 	}
 	global_data = NULL;
-	return -EINVAL;
+	if ((retval = shm_common_detach(sizeof(rtapi_data_t), rtapi_data)) != 0) {
+	    rtapi_print_msg(RTAPI_MSG_ERR,
+			    "RTAPI:%d ERROR: shm_common_detach(0x8.8%x) failed: %s\n",
+			    rtapi_instance, rtapikey, strerror(-retval));
+	}
+	rtapi_data = NULL;
     }
+    return 0;
 }
 
 void rtapi_app_exit(void)
 {
-    struct shm_status sm;
     int retval;
 
     rtapi_print_msg(RTAPI_MSG_DBG,"RTAPI:%d exit\n",
 		    rtapi_instance);
 
-    sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
-    sm.size = sizeof(global_data_t);
-    sm.flags = 0;
-    if ((retval = shmdrv_detach(&sm, rtapi_data)) < 0) {
+    retval = shm_common_detach(sizeof(global_data_t), global_data);
+    if (retval) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: shmdrv_detach(rtapi_data) returns %d\n",
-			rtapi_instance, retval);
+			"RTAPI:%d ERROR: munmap(0x8.8%x) failed: %s\n",
+			rtapi_instance,  OS_KEY(GLOBAL_KEY, rtapi_instance), 
+			strerror(-retval));
     }
-    rtapi_data = NULL;
-    sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
-    sm.size = sizeof(global_data_t);
-    sm.flags = 0;
-    if ((retval = shmdrv_detach(&sm, global_data)) < 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"INSTANCE:%d ERROR: shmdrv_detach(global_data) returns %d\n",
-			rtapi_instance, retval);
-    }
-    global_data = NULL;
-}
 
-EXPORT_SYMBOL(real_rtapi_app_main);
-EXPORT_SYMBOL(real_rtapi_app_exit);
+    retval = shm_common_detach(sizeof(rtapi_data_t), rtapi_data);
+    if (retval) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: munmap(0x8.8%x) failed: %s\n",
+			rtapi_instance,  OS_KEY(GLOBAL_KEY, rtapi_instance), 
+			strerror(-retval));
+    }
+}
 
 static int check_compatible()
 {
-    int retval = 0;
+    int retval = 1;
     const char *flavor_name = rtapi_get_handle()->thread_flavor_name;
 
     if (flavor_id == RTAPI_POSIX_ID)
@@ -173,8 +162,7 @@ static int check_compatible()
 	(flavor_id != RTAPI_XENOMAI_USER_ID)) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"RTAPI:%d started %s RTAPI on a Xenomai kernel\n",
-			flavor_name,
-			rtapi_instance);
+			rtapi_instance,flavor_name);
 	return 0;
     }
 
@@ -182,17 +170,15 @@ static int check_compatible()
 	(flavor_id != RTAPI_RTAI_KERNEL_ID)) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"RTAPI:%d started %s RTAPI on an RTAI kernel\n",
-			flavor_name,
-			rtapi_instance);
-	retval--;
+			rtapi_instance,flavor_name);
+	return 0;
     }
     if (kernel_is_rtpreempt() &&
 	(flavor_id != RTAPI_RT_PREEMPT_USER_ID)) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"RTAPI:%d started %s RTAPI on an RT PREEMPT kernel\n",
-			flavor_name,
-			rtapi_instance);
-	retval--;
+			rtapi_instance,flavor_name);
+	return 0;
     }
     return retval;
 }
