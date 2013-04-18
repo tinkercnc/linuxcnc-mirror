@@ -47,9 +47,14 @@ extern int shmdrv_detach(struct shm_status *shmstat);
 
 #else // userland
 
+#include <sys/mman.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
+
+// an mmap() failure returns MAP_FAILED, not NULL, so test for both
+#define MMAP_OK(x) (((x) != NULL) && ((x) != MAP_FAILED))
 
 extern int shmdrv_debug;
 
