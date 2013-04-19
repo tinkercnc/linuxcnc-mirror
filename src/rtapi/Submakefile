@@ -1,21 +1,26 @@
 INCLUDES += rtapi
 
-# this covers the userpci directory too, in a bit cludgy way
+# this covers the userpci and shmdrv directories too, in a bit cludgy way
 ../include/%.h: ./rtapi/%.h
 	mkdir -p ../include/userpci
 	cp  $^ $@
+
 ../include/%.hh: ./rtapi/%.hh
+	cp  $^ $@
+
+../include/%.h: ./rtapi/shmdrv/%.h
+	mkdir -p ../include/shmdrv
 	cp  $^ $@
 
 # cflags for all sources, -DRTAPI or -DULAPI
 #
 # see bottom of this file and Makefile
-RT_CFLAGS :=
+RT_CFLAGS := 
 # link flags for -DRTAPI/rtapi_app/rtapi.[ks]o and
 # ../lib/liblinuxcnchal.so
 #
 # see below and hal/Submakefile
-RT_LDFLAGS :=
+RT_LDFLAGS := -lrt  # POSIX shm_open() etc
 ULAPISO_LIBS :=
 # see enum thread_flavor_id in rtapi.h
 ifeq ($(THREADS),posix)
@@ -24,23 +29,21 @@ RT_CFLAGS+=-pthread -lrt
 endif
 ifeq ($(THREADS),rt-preempt-user)
 FLAVOR_FLAGS := -DTHREAD_FLAVOR_ID=1
-RT_CFLAGS+=-pthread -lrt
 endif
 ifeq ($(THREADS),xenomai-user)
 FLAVOR_FLAGS := -DTHREAD_FLAVOR_ID=2
-RT_CFLAGS +=   $(shell $(XENO_CONFIG) --skin=native  --ldflags)
+RT_CFLAGS +=   -lrt $(shell $(XENO_CONFIG) --skin=native  --ldflags)
 endif
 ifeq ($(THREADS),rtai)
 FLAVOR_FLAGS := -DTHREAD_FLAVOR_ID=3
 # these are needed to resolve rt_shm_alloc in ulapi.so
-ULAPISO_LIBS += /usr/realtime-`uname -r`/lib/liblxrt.a -lpthread
+ULAPISO_LIBS += /usr/realtime-`uname -r`/lib/liblxrt.a /usr/lib/libpthread.so
 endif
 ifeq ($(THREADS),xenomai-kernel)
 FLAVOR_FLAGS := -DTHREAD_FLAVOR_ID=4
 ULAPISO_LIBS +=  $(shell $(XENO_CONFIG) --skin=native  --ldflags)
 endif
 RT_CFLAGS += $(FLAVOR_FLAGS)
-
 ##########################################
 # defaults for all thread styles
 
@@ -53,39 +56,46 @@ ULAPI_SRCS := \
 	rtapi/rtapi_common.c \
 	rtapi/rtapi_task.c \
 	rtapi/rtapi_shmem.c \
+	rtapi/rtapi_ring.c \
 	rtapi/rtapi_time.c \
 	rtapi/$(THREADS_SOURCE).c \
-	$(if $(filter $(BUILD_SYS),kbuild),rtapi/rtapi_module.c)
+	$(if $(filter $(BUILD_SYS),kbuild),rtapi/rtapi_module.c) 
 
 ULAPISO_SRCS := $(ULAPI_SRCS) \
-	rtapi/instance.c  \
-	rtapi/rtapi_support.c
+	rtapi/ulapi_main.c  \
+	rtapi/rtapi_support.c 
 
-#$(warning ULAPISO_SRCS=$(ULAPISO_SRCS))
-
-#need to link against liblinuxcnchal.so so global_data is
 # resolved at loadtime
 $(call TOOBJSDEPS, $(ULAPISO_SRCS)): EXTRAFLAGS += -fPIC $(RT_CFLAGS)
 ULAPISO := ../lib/ulapi.so
-$(ULAPISO): ../lib/liblinuxcnchal.so  $(call TOOBJS, $(ULAPISO_SRCS))
+$(ULAPISO): ../lib/liblinuxcnchal.so ../lib/liblinuxcncshm.so  $(call TOOBJS, $(ULAPISO_SRCS))
 	$(ECHO) Creating shared object $(notdir $@)
 	@mkdir -p ../lib
 	@rm -f $@
 	$(Q)$(CC) $(LDFLAGS)  -Wl,-soname,$(notdir $@) -shared \
 	    -o $@ $^ $(ULAPISO_LIBS) $(RT_LDFLAGS) \
+	../lib/liblinuxcncshm.so \
 	../lib/liblinuxcnchal.so
 
 
-USERSRCS += $(ULAPISO_SRCS)
+USERSRCS += $(ULAPISO_SRCS) 
 TARGETS += $(ULAPISO)
 
-# the instance RT module
-INSTANCE_SRCS := \
-	rtapi/instance.c \
-	rtapi/rtapi_support.c
+# make shmdrvapi.o a shared library, which gets around -fPIC
+# issues on amd64
+SHMDRVAPISRCS := rtapi/shmdrv/shmdrvapi.c 
 
-USERSRCS += $(INSTANCE_SRCS)
+$(call TOOBJSDEPS, $(SHMDRVAPISRCS)): EXTRAFLAGS += -fPIC
+SHMDRVLIB := ../lib/liblinuxcncshm.so
 
+$(SHMDRVLIB).0: $(call TOOBJS, $(SHMDRVAPISRCS))
+	$(ECHO) Creating shared library $(notdir $@)
+	@mkdir -p ../lib
+	@rm -f $@
+	$(Q)$(CC) $(LDFLAGS)  -Wl,-soname,$(notdir $@) -shared \
+	    -o $@ $^ $(RT_LDFLAGS)
+USERSRCS += $(SHMDRVAPISRCS) 
+TARGETS += $(SHMDRVLIB) 
 
 # RTAPI:  ../rtlib/*
 #
@@ -116,8 +126,26 @@ ifeq ($(THREADS_SOURCE),rt-preempt-user)
 
 RT_CFLAGS +=  -pthread
 RT_LDFLAGS += -lpthread -lrt
-endif  # rt-preempt-user/posix
+endif 
+# rt-preempt-user/posix
 
+# the rtapi.so module
+obj-$(CONFIG_RTAPI) += rtapi.o
+
+rtapi-objs := \
+	rtapi/rtapi_main.o \
+	rtapi/rtapi_support.o \
+	rtapi/rtapi_common.o \
+	rtapi/rtapi_task.o \
+	rtapi/rtapi_shmem.o \
+	rtapi/rtapi_ring.o \
+	rtapi/rtapi_time.o \
+	rtapi/$(THREADS_SOURCE).o \
+	rtapi/shmdrv/shmdrvapi.o \
+	rtapi/rtapi_compat.o
+
+# rule for kernel module, moved from src/Makefile
+../rtlib/rtapi$(MODULE_EXT): $(addprefix objects/rt,$(rtapi-objs))
 
 ################################################
 # ../bin/rtapi_app
@@ -127,13 +155,12 @@ endif  # rt-preempt-user/posix
 # ifeq ($(USERMODE_PCI),yes)
 # RTAPI_SRCS := $(ULAPI_SRCS) rtapi/rtapi_pci.c
 # else
-# RTAPI_SRCS := $(ULAPI_SRCS)
+# RTAPI_SRCS := $(ULAPI_SRCS) 
 # endif
 #
 # Build objects/rtapi/sim_rtapi_app.o in Makefile (with -DULAPI,
 # despite others -DRTAPI; Makefile doesn't handle -DRTAPI C++ sources)
-USERSRCS +=  rtapi/sim_rtapi_app.cc rtapi/instance.c
-
+USERSRCS +=  rtapi/sim_rtapi_app.cc 
 #
 # List of objects objects/rtrtapi/*.o to link into ../bin/rtapi_app;
 # see that target below
@@ -160,6 +187,22 @@ TARGETS += ../bin/rtapi_app
 #                     KERNEL THREAD STYLES
 ##################################################################
 else  # BUILD_SYS == kbuild
+
+obj-$(CONFIG_RTAPI) += rtapi.o
+
+rtapi-objs := \
+	rtapi/rtapi_module.o \
+	rtapi/rtapi_support.o \
+	rtapi/rtapi_common.o \
+	rtapi/rtapi_task.o \
+	rtapi/rtapi_shmem.o \
+	rtapi/rtapi_ring.o \
+	rtapi/rtapi_time.o \
+	rtapi/rtapi_io.o \
+	rtapi/$(THREADS_SOURCE).o
+
+# rule for kernel module, moved from src/Makefile
+../rtlib/rtapi$(MODULE_EXT): $(addprefix objects/rt,$(rtapi-objs))
 
 ################################################
 # rtai settings
@@ -203,33 +246,58 @@ $(call TOOBJSDEPS, $(RTAPI_KDETECT_SRCS)): \
 
 TARGETS += ../bin/kdetect
 
-# .so load test
-RTAPI_LOAD_SRCS =  rtapi/rtapi_load.c
-USERSRCS += $(RTAPI_LOAD_SRCS)
-RTAPI_LOAD_OBJS := \
-	$(call TOOBJS, $(RTAPI_LOAD_SRCS))
+##################################################################
+#                     the rtapi message demon
+##################################################################
 
-$(call TOOBJSDEPS, $(RTAPI_LOAD_SRCS)): \
-	EXTRAFLAGS += -DTEST  \
-	 $(shell $(XENO_CONFIG) --skin=native --cflags )
+RTAPI_MSGD_SRCS =  rtapi/rtapi_msgd.c
+RTAPI_MSGD_OBJS := $(call TOOBJS, $(RTAPI_MSGD_SRCS))
 
-../bin/rtapiload: $(RTAPI_LOAD_OBJS)  ../lib/liblinuxcnchal.so
+$(call TOOBJSDEPS, $(RTAPI_MSGD_SRCS)): \
+	EXTRAFLAGS += -DTEST
+
+../bin/rtapi_msgd: ../lib/liblinuxcncshm.so $(RTAPI_MSGD_OBJS)
 	$(ECHO) Linking $(notdir $@)
-	$(Q)$(CC)  $(LDFLAGS) -o $@ $^ $(RT_LDFLAGS)  ../lib/liblinuxcnchal.so -lrt -ldl
+	$(Q)$(CC)  $(LDFLAGS) -o $@ $^ ../lib/liblinuxcncshm.so -lrt
 
-TARGETS += ../bin/rtapiload
+USERSRCS += $(RTAPI_MSGD_SRCS)
+TARGETS += ../bin/rtapi_msgd
 
-# ----- test shared object ----------
-FLAVOR1_SRCS := rtapi/flavor1.c
-$(call TOOBJSDEPS, $(FLAVOR1_SRCS)): EXTRAFLAGS += -fPIC
-USERSRCS += $(FLAVOR1_SRCS)
-FLAVOR1 := ../lib/flavor1.so
+##################################################################
+#             the shmdrv shared memory allocator module
+#
+#  loosely based on: http://www.embrisk.com/notes/shmem.html 
+#  Status: public domain
+#
+##################################################################
 
-$(FLAVOR1): $(call TOOBJS, $(FLAVOR1_SRCS))
-	$(ECHO) Creating shared library $(notdir $@)
-	@mkdir -p ../lib
-	@rm -f $@
-	$(Q)$(CC) $(LDFLAGS)  -Wl,-soname,$(notdir $@) -shared \
-	    -o $@ $^ $(RT_LDFLAGS)
+RT_CFLAGS += -I$(BASEPWD)/rtapi/shmdrv
+INCLUDES += rtapi/shmdrv
 
-TARGETS += $(FLAVOR1)
+ifeq ($(BUILD_SYS),kbuild)
+obj-m += shmdrv.o
+shmdrv-objs := rtapi/shmdrv/shmdrv.o
+../rtlib/shmdrv$(MODULE_EXT): $(addprefix objects/rt,$(shmdrv-objs))
+else
+
+# build shmdrv.ko for the currently running kernel
+../rtlib/shmdrv.ko: rtapi/shmdrv/shmdrv.h rtapi/shmdrv/shmdrv.c
+	(cd rtapi/shmdrv; make clean modules)
+	cp rtapi/shmdrv/shmdrv.ko ../rtlib
+
+TARGETS += ../rtlib/shmdrv.ko
+endif
+
+# lock debugging help plus a bit of API example
+MUTEXWATCH_SRCS =  rtapi/shmdrv/mutexwatch.c
+
+$(call TOOBJSDEPS, $(MUTEXWATCH_SRCS)): \
+	EXTRAFLAGS =  -Wall -g -O0 \
+	 $(shell $(XENO_CONFIG) --skin=native --cflags)
+
+../bin/mutexwatch: ../lib/liblinuxcncshm.so $(call TOOBJS, $(MUTEXWATCH_SRCS))
+	$(ECHO) Linking $(notdir $@)
+	$(Q)$(CC)  $(LDFLAGS) -o $@ $^  ../lib/liblinuxcncshm.so -lrt
+
+USERSRCS += $(MUTEXWATCH_SRCS)
+TARGETS += ../bin/mutexwatch

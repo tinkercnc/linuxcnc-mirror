@@ -223,7 +223,7 @@ static int proc_read_debug(char *page, char **start, off_t off,
 {
     PROC_PRINT_VARS;
     PROC_PRINT("******* RTAPI MESSAGES ******\n");
-    PROC_PRINT("  Message Level  = RT:%i User:%i\n",
+    PROC_PRINT("  Message Level  = RT:%i User:%i\n", 
 	       global_data->rt_msg_level,global_data->user_msg_level);
     PROC_PRINT("RT ERROR messages = %s\n",
 	global_data->rt_msg_level >= RTAPI_MSG_ERR ? "ON" : "OFF");

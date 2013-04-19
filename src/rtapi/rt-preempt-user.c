@@ -14,24 +14,25 @@
 ************************************************************************/
 
 #include <unistd.h>		// getpid(), syscall()
-#include <time.h>               // clock_nanosleep()
-
-#ifdef RTAPI
 #include <stdlib.h>		// malloc(), sizeof(), free()
 #include <string.h>		// memset()
+
+#ifdef RTAPI
+
 #include <signal.h>		// sigaction(), sigemptyset(), SIGXCPU...
 #include <sys/resource.h>	// rusage, getrusage(), RUSAGE_SELF
+#include <time.h>               // clock_nanosleep()
 
 /* Lock for task_array and module_array allocations */
 static pthread_key_t task_key;
 static pthread_once_t task_key_once = PTHREAD_ONCE_INIT;
 
+
 #  ifndef RTAPI_POSIX
 static int error_printed;
 #  endif
-#endif  /* RTAPI */
+#endif  // RTAPI
 
-#define MODULE_OFFSET		32768
 
 typedef struct {
     int deleted;
@@ -64,68 +65,10 @@ int _rtapi_exit(int module_id) {
 	return 0;
 }
 
-#else /* RTAPI */
-
-int _rtapi_init(const char *modname) {
-    int n, module_id = -ENOMEM;
-    module_data *module;
-
-    /* say hello */
-    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI: initing module %s\n", modname);
-
-    /* get the mutex */
-    rtapi_mutex_get(&(rtapi_data->mutex));
-    /* find empty spot in module array */
-    n = 1;
-    while ((n <= RTAPI_MAX_MODULES) && (module_array[n].state != NO_MODULE)) {
-	n++;
-    }
-    if (n > RTAPI_MAX_MODULES) {
-	/* no room */
-	rtapi_mutex_give(&(rtapi_data->mutex));
-	rtapi_print_msg(RTAPI_MSG_ERR, "RTAPI: ERROR: reached module limit %d\n",
-			n);
-	return -EMFILE;
-    }
-    /* we have space for the module */
-    module_id = n + MODULE_OFFSET;
-    module = &(module_array[n]);
-    /* update module data */
-    module->state = REALTIME;
-    if (modname != NULL) {
-	/* use name supplied by caller, truncating if needed */
-	rtapi_snprintf(module->name, RTAPI_NAME_LEN, "%s", modname);
-    } else {
-	/* make up a name */
-	rtapi_snprintf(module->name, RTAPI_NAME_LEN, "ULMOD%03d", module_id);
-    }
-    rtapi_data->ul_module_count++;
-    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI: module '%s' loaded, ID: %d\n",
-	module->name, module_id);
-    rtapi_mutex_give(&(rtapi_data->mutex));
-    return module_id;
-}
-
-int _rtapi_exit(int module_id) {
-    module_id -= MODULE_OFFSET;
-
-    if (module_id < 0 || module_id >= RTAPI_MAX_MODULES)
-	return -1;
-    /* Remove the module from the module_array. */
-    rtapi_mutex_get(&(rtapi_data->mutex));
-    module_array[module_id].state = NO_MODULE;
-    rtapi_print_msg(RTAPI_MSG_DBG,
-		    "rtapi_exit: freed module slot %d, was %s\n",
-		    module_id, module_array[module_id].name);
-    rtapi_mutex_give(&(rtapi_data->mutex));
-
-    return 0;
-}
-
+#ifdef RTAPI 
 static inline int task_id(task_data *task) {
     return (int)(task - task_array);
 }
-
 
 #ifndef RTAPI_POSIX
 static unsigned long _rtapi_get_pagefault_count(task_data *task) {
@@ -410,9 +353,8 @@ static void *realtime_thread(void *arg) {
     /* We're done initializing. Open the barrier. */
     pthread_barrier_wait(&extra_task_data[task_id(task)].thread_init_barrier);
 
-    clock_gettime(CLOCK_MONOTONIC, &extra_task_data[task_id(task)].next_time);
-    _rtapi_advance_time(&extra_task_data[task_id(task)].next_time,
-		       task->period, 0);
+    clock_gettime(CLOCK_MONOTONIC, &task->next_time);
+    _rtapi_advance_time(&task->next_time, task->period, 0);
 
     /* call the task function with the task argument */
     task->taskcode(task->arg);
@@ -469,8 +411,9 @@ int _rtapi_task_start_hook(task_data *task, int task_id) {
     return 0;
 }
 
+<<<<<<< HEAD
 void _rtapi_task_stop_hook(task_data *task, int task_id) {
-    extra_task_data[task_id].destroyed = 1;
+    task->destroyed = 1;
 }
 
 int _rtapi_wait_hook(void) {
@@ -487,10 +430,9 @@ int _rtapi_wait_hook(void) {
 	sched_wait_interval(TIMER_ABSTIME,
 			    &extra_task_data[task_id(task)].next_time, NULL);
     else
-	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME,
-			&extra_task_data[task_id(task)].next_time, NULL);
-    _rtapi_advance_time(&extra_task_data[task_id(task)].next_time,
-		       task->period, 0);
+	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &task->next_time,
+			NULL);
+    _rtapi_advance_time(&task->next_time, task->period, 0);
     clock_gettime(CLOCK_MONOTONIC, &ts);
     if (ts.tv_sec > extra_task_data[task_id(task)].next_time.tv_sec
 	|| (ts.tv_sec == extra_task_data[task_id(task)].next_time.tv_sec
@@ -531,4 +473,4 @@ void _rtapi_delay_hook(long int nsec)
     clock_nanosleep(CLOCK_MONOTONIC, 0, &t, NULL);
 }
 
-#endif /* ULAPI/RTAPI */
+#endif /* RTAPI */

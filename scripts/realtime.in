@@ -91,8 +91,9 @@ CheckConfig(){
             MOD="${MOD%$MODULE_EXT}"
             MODULES_UNLOAD="$MOD $MODULES_UNLOAD"
         done
-	# always load rtapi first
-	#MODULES_LOAD="$MODULES_LOAD $RTLIB_DIR/instance$MODULE_EXT"
+	# always load shmdrv first
+	MODULES_LOAD="$MODULES_LOAD $RTLIB_DIR/shmdrv$MODULE_EXT"
+	MODULES_UNLOAD="$MODULES_UNLOAD shmdrv"
         if test $RTPREFIX = xenomai-kernel; then
             MODULES_LOAD="$MODULES_LOAD $RTLIB_DIR/xeno_math$MODULE_EXT  $RTLIB_DIR/rtapi$MODULE_EXT $RTLIB_DIR/hal_lib$MODULE_EXT"
             MODULES_UNLOAD="hal_lib rtapi xeno_math $MODULES_UNLOAD"
@@ -163,31 +164,49 @@ Load(){
     CheckKernel
     case $RTPREFIX in
     posix|xenomai-user|rt-preempt-user)
+        # check for instance running
+	# this is the case if the global segment exists
+        # and any processes exist which have it attached
+	GLOBALSEG=`printf '/dev/shm/linuxcnc-%d-%2.2d154711' $INSTANCE $INSTANCE` 
+	if fuser $GLOBALSEG >/dev/null 2>&1 ; then
+	    echo instance $INSTANCE already running!
+	    exit 1
+	fi
 
-	#echo Load: INSTANCE=$INSTANCE DEBUG=$DEBUG
+	# check for any leftover shm keys from aborted previous sessions
+	INSTKEY=`printf 'linuxcnc-%d-' $INSTANCE` 
+	SHMKEYS=`ls /dev/shm/${INSTKEY}* >/dev/null 2>&1`
+
+	if [ "$SHMKEYS" != "" ]  ; then
+	    echo "warning: leftover shared memory segments detected - removing: " $SHMKEYS
+	    rm  -f  "$SHMKEYS" >/dev/null 2>&1
+	fi
 
 	if [ "$DEBUG" != "" ] ; then
 	    rtapi_app --instance=$INSTANCE \
 		--rtmsglevel=$DEBUG \
 		--usrmsglevel=$DEBUG \
-		--halsize=$HAL_SIZE
-#		load rtapi
-	    rtapi_app --instance=$INSTANCE \
-		load hal_lib
+		--halsize=$HAL_SIZE 
 	else
 	    rtapi_app --instance $INSTANCE \
 		--halsize=$HAL_SIZE \
 		--rtmsglevel=$DEBUG \
-		--usrmsglevel=$DEBUG 2>&1 >/dev/null
-#		load rtapi
-	    rtapi_app --instance=$INSTANCE \
-		load hal_lib  2>&1 >/dev/null
+		--usrmsglevel=$DEBUG 2>&1 >/dev/null  
         fi
 
+	# ping is a noop which will finish only once rtapi_app
+	# is fully set up and responds. This closes a race condition where clients
+	# like halcmd might try to attach the HAL data segment before
+	# rtapi_app got around to creating it
+	rtapi_app --instance $INSTANCE ping
+
+	# unified logging
+	rtapi_msgd --instance=$INSTANCE
     ;;
+
     *)
         for MOD in $MODULES_LOAD ; do
-	    # if loading instance.ko, tack on parameters
+	    # if loading rtapi.ko, tack on parameters
 	    if echo $MOD | grep rtapi.ko >/dev/null  ; then
 		$INSMOD $MOD hal_size=$HAL_SIZE rtapi_instance=$INSTANCE \
 		    rt_msg_level=$DEBUG user_msg_level=$DEBUG
@@ -195,10 +214,11 @@ Load(){
 		$INSMOD $MOD || return $?
 	    fi
         done
-	# this overrides 'instance msg_level' but allows debugging startup issues
+	# help debugging startup issues 
         if [ "$DEBUG" != "" ] && [ -w /proc/rtapi/debug ] ; then
             echo "$DEBUG" > /proc/rtapi/debug
         fi
+	rtapi_msgd --instance=$INSTANCE
     esac
 }
 
@@ -220,43 +240,34 @@ Unload(){
     CheckKernel
     case $RTPREFIX in
     posix|xenomai-user|rt-preempt-user)
-
 	if [ "$DEBUG" != "" ] ; then
-            rtapi_app --instance=$INSTANCE exit
+            rtapi_app --instance=$INSTANCE exit 
 	else
             rtapi_app --instance=$INSTANCE exit            >/dev/null 2>&1
         fi
 
+	MSGD_PID=`pidof msgd:$INSTANCE`
+	if [ "$MSGD_PID" != "" ] ; then
+	    kill $MSGD_PID
+	fi
 
-	# remove any linuxcnc-specific shm segments if they exist
-	# HAL_KEY  RTAPI_KEY GLOBAL_KEY DEFAULT_MOTION_SHMEM_KEY
-	# see src/rtapi/rtapi_shmkeys.h
+	# remove any linuxcnc-specific POSIX shm segments if they exist
+	# see src/rtapi/rtapi_shmkeys.h: SHM_FMT
 
-	INSTKEY=`printf '%2.2d' $INSTANCE`
-
-	ipcrm  -M 0x${INSTKEY}414c32 >/dev/null 2>&1
-	ipcrm  -M 0x${INSTKEY}280a48 >/dev/null 2>&1
-	ipcrm  -M 0x${INSTKEY}154711 >/dev/null 2>&1
-	ipcrm  -M 0x${INSTKEY}000064 >/dev/null 2>&1 | :
-
-	# assorted module leftover shm segments
-	RE="("
-	RE=${RE}"0x"${INSTKEY}"5354[0-9a-f][0-9a-f]|"
-	RE=${RE}"0x"${INSTKEY}"5341[0-9a-f][0-9a-f]|"
-	RE=${RE}"0x"${INSTKEY}"4C522B|"
-	RE=${RE}"0x"${INSTKEY}"280A48|"
-	RE=${RE}"0x"${INSTKEY}"4150[0-9a-f][0-9a-f])"
-
-	CMD="`ipcs -m | egrep '"${RE}"' |cut -f1 -d' '`"
-
-	for i in $CMD
-	do
-	    ipcrm -M $i
-	done
-
+	INSTKEY=`printf 'linuxcnc-%d-' $INSTANCE` 
+	rm  -f  /dev/shm/${INSTKEY}* >/dev/null 2>&1
         ;;
     *)
+	MSGD_PID=`pidof msgd:$INSTANCE`
+	if [ "$MSGD_PID" != "" ] ; then
+	    kill $MSGD_PID
+	fi
         for module in $MODULES_UNLOAD ; do
+	    if [ "$module" == "shmdrv" ] ; then
+                # shmdrv needs a bit of time until rtapi+hal_lib
+		# have detached shm segments
+		sleep 1
+	    fi
             $RMMOD $module
         done
     esac

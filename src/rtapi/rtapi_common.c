@@ -35,14 +35,16 @@ rtapi_data_t *rtapi_data = &local_rtapi_data;
 task_data *task_array =  local_rtapi_data.task_array;
 shmem_data *shmem_array = local_rtapi_data.shmem_array;
 module_data *module_array = local_rtapi_data.module_array;
+ring_data *ring_array = local_rtapi_data.ring_array;
 #else
 rtapi_data_t *rtapi_data = NULL;
 task_data *task_array = NULL;
 shmem_data *shmem_array = NULL;
 module_data *module_array = NULL;
+ring_data *ring_array = NULL;
 #endif
 
-// in the RTAPI scenario,
+// in the RTAPI scenario,  
 // global_data is exported by instance.ko and referenced
 // by rtapi.ko and hal_lib.ko
 
@@ -52,7 +54,7 @@ module_data *module_array = NULL;
 
 extern global_data_t *global_data;
 
-/*
+/* 
    define the rtapi_switch struct, with pointers to all rtapi_*
    functions
 
@@ -128,15 +130,55 @@ static rtapi_switch_t rtapi_switch_struct = {
 #endif
     // shared memory functions
     .rtapi_shmem_new = &_rtapi_shmem_new,
+    .rtapi_shmem_new_inst = &_rtapi_shmem_new_inst,
+
     .rtapi_shmem_delete = &_rtapi_shmem_delete,
+    .rtapi_shmem_delete_inst = &_rtapi_shmem_delete_inst,
+
     .rtapi_shmem_getptr = &_rtapi_shmem_getptr,
+    .rtapi_shmem_getptr_inst = &_rtapi_shmem_getptr_inst,
+
+    // ringbuffer functions
+    .rtapi_ring_new = &_rtapi_ring_new,
+    .rtapi_ring_attach = &_rtapi_ring_attach,
+    .rtapi_ring_detach = &_rtapi_ring_detach,
 };
 
 // any API, any style:
 rtapi_switch_t *rtapi_get_handle(void) {
     return &rtapi_switch_struct;
 }
+#ifdef RTAPI
 EXPORT_SYMBOL(rtapi_get_handle);
+#endif
+
+#if defined(BUILD_SYS_KBUILD)
+int shmdrv_loaded = 1;  // implicit
+#else
+int shmdrv_loaded;  // set in rtapi_app_main, and ulapi_main
+#endif
+long page_size;     // set in rtapi_app_main
+
+void rtapi_autorelease_mutex(void *variable)
+{
+    if (rtapi_data != NULL)
+	rtapi_mutex_give(&(rtapi_data->mutex));
+    else 
+	// programming error
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"rtapi_autorelease_mutex: rtapi_data == NULL!\n");
+}
+
+// in the RTAPI scenario,
+// global_data is exported by instance.ko and referenced
+// by rtapi.ko and hal_lib.ko
+
+// in ULAPI, we have only hal_lib which calls 'down'
+// onto ulapi.so to init, so in this case global_data
+// is exported by hal_lib and referenced by ulapi.so
+
+extern global_data_t *global_data;
+
 
 /* global init code */
 #ifdef HAVE_INIT_RTAPI_DATA_HOOK  // declare a prototype
@@ -159,6 +201,7 @@ void init_rtapi_data(rtapi_data_t * data)
     /* set version code and flavor ID so other modules can check it */
     data->serial = RTAPI_SERIAL;
     data->thread_flavor_id = THREAD_FLAVOR_ID;
+    data->ring_mutex = 0;
     /* and get busy */
     data->rt_module_count = 0;
     data->ul_module_count = 0;
@@ -186,6 +229,14 @@ void init_rtapi_data(rtapi_data_t * data)
 	for (m = 0; m < _BITS_TO_LONGS(RTAPI_MAX_SHMEMS +1); m++) {
 	    data->shmem_array[n].bitmap[m] = 0;
 	}
+#if defined(USE_SHMDRV)
+    	data->shmem_array[n].mmap_fd = -1;
+#endif
+    }
+    for (n = 0; n <= RTAPI_MAX_RINGS; n++) {
+	data->ring_array[n].magic = 0;
+	data->ring_array[n].key = 0;
+	data->ring_array[n].owner = 0;
     }
 #ifdef HAVE_INIT_RTAPI_DATA_HOOK
     init_rtapi_data_hook(data);
@@ -196,7 +247,75 @@ void init_rtapi_data(rtapi_data_t * data)
     return;
 }
 
-int  _rtapi_next_module_id(void)
+// rtapi_module.c, rtapi_main.c
+extern ringbuffer_t rtapi_message_buffer;   // error ring access strcuture
+
+void init_global_data(global_data_t * data, 
+		      int instance_id, int hal_size, 
+		      int rt_level, int user_level,
+		      const char *name)
+{
+    /* has the block already been initialized? */
+    if (data->magic == GLOBAL_MAGIC) {
+	/* yes, nothing to do */
+	return;
+    }
+    /* no, we need to init it, grab mutex unconditionally */
+    // 'locked' should never happen since this is the first module loaded
+    // but you never know what people come up with
+    rtapi_mutex_try(&(data->mutex));
+    /* set magic number so nobody else init's the block */
+    data->magic = GLOBAL_MAGIC;
+    /* set version code so other modules can check it */
+    data->layout_version = GLOBAL_LAYOUT_VERSION;
+
+    data->instance_id = instance_id;
+
+    // passed in from rtap.so/ko args
+    if (strlen(name) == 0) {
+	snprintf(data->instance_name,sizeof(data->instance_name), 
+		 "inst%d",rtapi_instance);
+    } else {
+	strncpy(data->instance_name,name, sizeof(data->instance_name));
+    }
+
+    // separate message levels for RT and userland
+    data->rt_msg_level = rt_level;
+    data->user_msg_level = user_level;
+
+    // next value returned by rtapi_init (userland threads)
+    // those dont use fixed sized arrays 
+    data->next_module_id = 0;
+
+    // tell the others what thread flavor this RTAPI was compiled for
+    data->rtapi_thread_flavor = THREAD_FLAVOR_ID;
+
+    // HAL segment size - module param to rtapi 'hal_size=n'
+    data->hal_size = hal_size;
+
+    // init the error ring
+    rtapi_ringheader_init(&data->rtapi_messages, 0, SIZE_ALIGN(MESSAGE_RING_SIZE), 0);
+    memset(&data->rtapi_messages.buf[0], 0, SIZE_ALIGN(MESSAGE_RING_SIZE));
+
+    // prime it
+    data->rtapi_messages.refcount = 1;   // rtapi is 'attached'
+    data->rtapi_messages.use_wmutex = 1; // hint only
+
+    // demon pids
+    data->rtapi_app_pid = 0;
+    data->rtapi_msgd_pid = 0;
+
+    // make it accessible
+    rtapi_ringbuffer_init(&data->rtapi_messages, &rtapi_message_buffer);
+
+    rtapi_set_logtag("rt");
+
+    /* done, release the mutex */
+    rtapi_mutex_give(&(data->mutex));
+    return;
+}
+
+int  _rtapi_next_module_id(void) 
 {
     int next_id;
 
@@ -237,9 +356,9 @@ void _rtapi_printall(void) {
 		    rtapi_data);
     rtapi_print_msg(RTAPI_MSG_DBG, "  magic = %d\n",
 		    rtapi_data->magic);
-    rtapi_print_msg(RTAPI_MSG_DBG, "  serial = %s\n",
+    rtapi_print_msg(RTAPI_MSG_DBG, "  serial = %d\n",
 		    rtapi_data->serial);
-    rtapi_print_msg(RTAPI_MSG_DBG, "  thread_flavor_id = %d\n",
+    rtapi_print_msg(RTAPI_MSG_DBG, "  thread_flavor id = %d\n",
 		    rtapi_data->thread_flavor_id);
     rtapi_print_msg(RTAPI_MSG_DBG, "  mutex = %lu\n",
 		    rtapi_data->mutex);

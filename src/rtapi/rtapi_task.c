@@ -130,9 +130,9 @@ int _rtapi_task_new(void (*taskcode) (void*), void *arg,
     task = &(task_array[task_id]);
 
     // if requested priority is invalid, release lock and return error
+
     if (PRIO_LT(prio,_rtapi_prio_lowest()) ||
 	PRIO_GT(prio,_rtapi_prio_highest())) {
-	
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"New task  %d  '%s:%d': invalid priority %d "
 			"(highest=%d lowest=%d)\n",
@@ -165,7 +165,7 @@ int _rtapi_task_new(void (*taskcode) (void*), void *arg,
     rtapi_print_msg(RTAPI_MSG_DBG,
 		    "Task CPU:  %d\n", task->cpu);
     /*    task->cpu = cpu_id;  */
-    snprintf(task->name, sizeof(task->name),
+    snprintf(task->name, sizeof(task->name), 
 	     "%s:%d", name, rtapi_instance);
     task->name[sizeof(task->name) - 1] = '\0';
 

@@ -91,6 +91,8 @@ extern int rtapi_get_msg_level(void);
 typedef void(*rtapi_msg_handler_t)(msg_level_t level, const char *fmt,
 				   va_list ap);
 #ifdef RTAPI
+#endif // RTAPI
+
 typedef void (*rtapi_set_msg_handler_t)(rtapi_msg_handler_t);
 
 extern void rtapi_set_msg_handler(rtapi_msg_handler_t handler);
@@ -98,13 +100,35 @@ extern void rtapi_set_msg_handler(rtapi_msg_handler_t handler);
 typedef rtapi_msg_handler_t (*rtapi_get_msg_handler_t)(void);
 
 extern rtapi_msg_handler_t rtapi_get_msg_handler(void);
-#endif // RTAPI
+
+extern int rtapi_set_logtag(const char *fmt, ...);
+
+typedef enum {
+	MSG_KERNEL = 0,
+	MSG_RTUSER = 1,
+	MSG_ULAPI = 2,
+} msg_origin_t;
+
+typedef enum {
+    MSG_ASCII    = 0,  // printf conversion already applied
+    MSG_STASHF   = 1,  // Jeff's stashf.c argument encoding
+    MSG_PROTOBUF = 2,  // encoded as protobuf RTAPI_Message
+} msg_encoding_t;
+
+#define TAGSIZE 16
+
+typedef struct {
+    msg_origin_t   origin;   // where is this coming from
+    int pid;                 // if User RT or ULAPI; 0 for kernel
+    int level;               // as passed in to rtapi_print_msg()
+    char tag[TAGSIZE];       // eg program or module name
+    msg_encoding_t encoding; // how to interpret buf
+    char buf[0];             // actual message
+} rtapi_msgheader_t;
 
 #define rtapi2syslog(level) (level+2)
 
-#if defined(ULAPI)
-extern int rtapi_openlog(const char *tag, int level);
-extern int rtapi_closelog(void);
+#if defined(ULAPI) || defined(BUILD_SYS_USER_DSO)
 
 /* make sure a given kernel module is loaded.
    might be needed for some usermode PCI drivers
@@ -118,7 +142,7 @@ extern int kernel_is_xenomai();
 extern int kernel_is_rtai();
 extern int kernel_is_rtpreempt();
 
-#endif // BUILD_SYS_USER_DSO
+#endif 
 
 enum flavor_flags {
     FLAVOR_DOES_IO=1,
@@ -132,7 +156,7 @@ typedef struct {
     const char *so_ext;
     int id;
     unsigned long flags;
-
+    
 } flavor_t, *flavor_ptr;
 
 extern flavor_t flavors[];
@@ -161,15 +185,15 @@ extern flavor_ptr default_flavor(void);
  * however, there is a HAL driver for kernel version foo which is not needed on
  * other kernel versions.
  * In this case, place modules like so:
- *
+ * 
  * LIBPATH/xenomai-user/    # standard modules go here
  * LIBPATH/xenomai-user/foo/hal_driver.so   # more specific driver goes here
  *
  */
-extern int module_path(flavor_ptr f,
+extern int module_path(flavor_ptr f, 
 		       char *result,
-		       const char *libpath,
-		       const char *basename,
+		       const char *libpath, 
+		       const char *basename, 
 		       const char *ext);
 //#endif // ULAPI
 

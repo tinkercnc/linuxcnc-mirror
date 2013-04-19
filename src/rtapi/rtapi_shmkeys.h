@@ -4,8 +4,8 @@
 // the single place for shared memory keys
 
 // convention: allocate a new key such that its
-// most significant byte is zero, which is used for
-// instance management.
+// most significant byte is zero, which is used for 
+// instance management. 
 // the rtapi_shmem_new code actually ignores the MSB
 // and replaces it be the rtapi_instance variable, so we
 // dont have to do the big shm key rename right away; just
@@ -13,13 +13,15 @@
 // this convention is also used for the global shm segment.
 
 // actual shm keys are constructed as follows:
-#define OS_KEY(key) (( key & 0x00ffffff) | ((rtapi_instance << 24) & 0xff000000))
+
+#define OS_KEY(key, instance) (( key & 0x00ffffff) | ((instance << 24) & 0xff000000))
+#define INSTANCE_OF(key)  (((key & 0xff000000) >> 24) & 0x000000ff)
 
 // formerly emcmotcfg.h
 #define DEFAULT_MOTION_SHMEM_KEY 0x00000064
 
 // the global segment shm key
-#define GLOBAL_KEY  0x00154711     // key for GLOBAL
+#define GLOBAL_KEY  0x00154711     // key for GLOBAL 
 
 // from scope_shm.h
 #define SCOPE_SHM_KEY  0x000CF406
@@ -37,9 +39,12 @@
 // from rtapi/rtapi_common.h
 #define RTAPI_KEY   0x00280A48	/* key used to open RTAPI shared memory */
 
-// HAL rings
-#define HAL_RING_SHM_KEY 0x00415000
+// RTAPI rings
+#define RTAPI_RING_SHM_KEY 0x00415000  
 
-
+// filename format in /dev/shm for POSIX shm_open() names:
+// 'linuxcnc-<rtapi_instance>-<key>
+// this makes it easier to delete all leftover segments in scripts/realtime:Unload
+#define SHM_FMT "/linuxcnc-%d-%8.8x"
 
 #endif // _RTAPI_SHMKEYS_H

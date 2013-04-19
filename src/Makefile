@@ -17,11 +17,14 @@ endif
 # (setuid, install)
 ifeq ($(MAKECMDGOALS),)
 TRIVIAL_BUILD=no
+$(warning  nontriv)
 else
 ifeq ($(filter-out docclean clean setuid install tags swish,$(MAKECMDGOALS)),)
 TRIVIAL_BUILD=yes
+$(warning  trivial)
 else
 TRIVIAL_BUILD=no
+$(warning  nontriv)
 endif
 endif
 
@@ -111,7 +114,8 @@ SUBDIRS := \
     rtapi/examples/extint rtapi/examples/fifo rtapi/examples rtapi \
     \
     hal/components hal/drivers hal/user_comps/devices \
-    hal/user_comps hal/user_comps/vismach hal/classicladder hal/utils hal \
+    hal/user_comps hal/user_comps/vismach hal/user_comps/vfs11_vfd \
+    hal/classicladder hal/utils hal \
     \
     emc/usr_intf/axis emc/usr_intf/touchy emc/usr_intf/stepconf emc/usr_intf/pncconf \
     emc/usr_intf/gremlin \
@@ -122,7 +126,14 @@ SUBDIRS := \
     \
     po \
     \
-    ../docs/src
+    ../docs/src \
+    protobuf \
+    protobuf/components \
+    protobuf/examples \
+    hal/halgroups \
+    hal/halreport \
+    hal/remote \
+    hal/msgcomponents
 
 # moved to src/rtapi/Submakefile
 # ULAPISRCS := rtapi/$(RTPREFIX)_ulapi.c
@@ -148,8 +159,8 @@ SUBMAKEFILES := $(patsubst %,%/Submakefile,$(SUBDIRS))
 # This checks that all the things listed in USERSRCS are either C files
 # or C++ files
 ASSERT_EMPTY = $(if $(1), $(error "Should be empty but is not: $(1)"))
-$(call ASSERT_EMPTY,$(filter-out %.c %.cc, $(USERSRCS)))
-$(call ASSERT_EMPTY,$(filter-out %.c, $(RTSRCS)))
+$(call ASSERT_EMPTY,$(filter-out %.c %.cc %.proto, $(USERSRCS)))
+$(call ASSERT_EMPTY,$(filter-out %.c %.proto, $(RTSRCS)))
 
 ifeq ($(BUILD_PYTHON),yes)
 $(call TOOBJSDEPS,$(PYSRCS)) : EXTRAFLAGS += -fPIC $(call cc-option,-fno-strict-aliasing)
@@ -162,7 +173,23 @@ CXXUSERSRCS := $(filter %.cc,$(USERSRCS))
 CUSEROBJS := $(call TOOBJS,$(CUSERSRCS))
 CXXUSEROBJS += $(call TOOBJS,$(CXXUSERSRCS))
 
+
+depends/protodeps.d: 
+	$(warning generated=$(GENERATED))
+	./mkprotodep -p protobuf/proto \
+            -e pb.h -e npb.h -e pb-c.h -e pb.cc -e npb.c -e pb-c.c \
+            -d depends -g protobuf/generated >depends/protodeps.d
+
+#	    -p protobuf/nanopb/generator \
+#	    -p  /usr/local/include/google/protobuf \
+
+#.PHONY: protodeps
+
 ifeq ($(TRIVIAL_BUILD),no)
+ifeq ($(USE_PROTOBUF),yes)
+Makefile:	depends/protodeps.d $(GENERATED)
+-include depends/protodeps.d
+endif
 # Find the dependency filenames, then include them all
 DEPS := $(sort $(patsubst objects/%.o,depends/%.d,$(CUSEROBJS) $(CXXUSEROBJS)))
 -include $(DEPS)
@@ -360,8 +387,11 @@ HEADERS := \
     rtapi/rtapi_errno.h \
     rtapi/rtapi_string.h \
     rtapi/rtapi_pci.h \
+    rtapi/rtapi_ring.h \
+    rtapi/rtapi_mbarrier.h \
     rtapi/rtapi_support.h \
-    rtapi/$(THREADS_SOURCE).h
+    rtapi/$(THREADS_SOURCE).h \
+    rtapi/shmdrv/shmdrv.h
 
 # need to do ths separately because the subdirectory is required
 # ../include/string.h would wreak havoc because it's the 
@@ -438,13 +468,18 @@ modclean:
 depclean:
 	-rm -rf depends
 
-clean: depclean modclean
+clean: depclean modclean protobuf-clean
 	find . -name '*.o' |xargs rm -f
 	-rm -rf objects
 	-rm -f $(TARGETS)
 	-rm -f $(COPY_CONFIGS)
 	-rm -f ../rtlib/*.$(MODULE_EXT)
 	-rm -f hal/components/conv_*.comp
+
+# cleanup protoc/protoc-c/nanopb generated files
+protobuf-clean:
+	-rm -f protobuf/generated/*
+
 
 # So that nothing is built as root, this rule does not depend on the touched
 # files (Note that files in depends/ might be rebuilt, and there's little that
@@ -675,8 +710,12 @@ endif # userspace
 
 ifneq ($(KERNELRELEASE),)
 include $(BASEPWD)/hal/components/Submakefile
+include $(BASEPWD)/hal/msgcomponents/Submakefile
+include $(BASEPWD)/protobuf/components/Submakefile
 # to pull FLAVOR_FLAGS - see Makefile.modinc.in
 include $(BASEPWD)/rtapi/Submakefile
+# to pull EXTRA_CFLAGS for nanopb
+include $(BASEPWD)/protobuf/Submakefile
 endif
 
 # KERNELRELEASE is nonempty, therefore we are building modules using the
@@ -699,6 +738,8 @@ EXTRA_CFLAGS = $(filter-out -ffast-math,$(RTFLAGS))  \
 	-I$(BASEPWD)/emc/nml_intf \
 	-I$(BASEPWD)/emc/kinematics \
 	-I$(BASEPWD)/emc/motion \
+	-I$(BASEPWD)/protobuf/generated \
+	-I$(BASEPWD)/protobuf/nanopb  \
 	-DSEQUENTIAL_SUPPORT -DHAL_SUPPORT -DDYNAMIC_PLCSIZE -DRT_SUPPORT \
 	-DOLD_TIMERS_MONOS_SUPPORT -DMODBUS_IO_MASTER \
 	-fno-fast-math \
@@ -729,29 +770,32 @@ endif
 
 # Subdirectory:  rtapi
 
-obj-$(CONFIG_RTAPI) += rtapi.o
+# obj-$(CONFIG_RTAPI) += rtapi.o
 
-# Sources for all thread systems
-rtapi-objs := \
-	rtapi/instance.o \
-	rtapi/rtapi_support.o \
-	rtapi/rtapi_common.o \
-	rtapi/rtapi_task.o \
-	rtapi/rtapi_shmem.o \
-	rtapi/rtapi_time.o \
-	rtapi/$(THREADS_SOURCE).o
-# Kernel threads need rtapi_module.c
-ifeq ($(BUILD_SYS),kbuild)
-rtapi-objs += rtapi/rtapi_module.o
-endif
-# User threads need rtapi_pci.c
-ifeq ($(BUILD_SYS),user-dso)
-rtapi-objs += rtapi/rtapi_pci.o
-# and rtapi_app_main/exit stubs
-rtapi-objs += rtapi/rtapi_main.o
-# and autodetect/compat checks
-rtapi-objs += rtapi/rtapi_compat.o
-endif
+# # Sources for all thread systems
+# rtapi-objs := \
+# 	rtapi/instance.o \
+# 	rtapi/rtapi_support.o \
+# 	rtapi/rtapi_common.o \
+# 	rtapi/rtapi_task.o \
+# 	rtapi/rtapi_shmem.o \
+# 	rtapi/rtapi_ring.o \
+# 	rtapi/rtapi_time.o \
+# 	rtapi/rtapi_io.o \
+# 	rtapi/$(THREADS_SOURCE).o
+# # Kernel threads need rtapi_module.c
+# ifeq ($(BUILD_SYS),kbuild)
+# rtapi-objs += rtapi/rtapi_module.o
+# endif
+# # User threads need rtapi_pci.c
+# ifeq ($(BUILD_SYS),user-dso)
+# rtapi-objs += rtapi/rtapi_pci.o
+# rtapi-objs += rtapi/shmdrv/shmdrvapi.o
+# # and rtapi_app_main/exit stubs
+# rtapi-objs += rtapi/rtapi_main.o
+# # and autodetect/compat checks
+# rtapi-objs += rtapi/rtapi_compat.o
+# endif
 
 
 # Subdirectory: rtapi/examples (unneeded?)
@@ -1041,7 +1085,8 @@ endif # end BUILD_SYS=user-dso
 
 # build kernel RTAPI modules
 ifneq "$(filter normal user-dso,$(BUILD_SYS))" ""
-../rtlib/rtapi$(MODULE_EXT): $(addprefix objects/rt,$(rtapi-objs))
+#../rtlib/instance$(MODULE_EXT): $(addprefix objects/rt,$(instance-objs))
+#../rtlib/rtapi$(MODULE_EXT): $(addprefix objects/rt,$(rtapi-objs))
 ../rtlib/classicladder_rt$(MODULE_EXT): $(addprefix objects/rt,$(classicladder_rt-objs))
 ../rtlib/boss_plc$(MODULE_EXT): $(addprefix objects/rt,$(boss_plc-objs))
 ../rtlib/debounce$(MODULE_EXT): $(addprefix objects/rt,$(debounce-objs))
@@ -1126,6 +1171,7 @@ tags:
 	find . -type f -name '*.[ch]' |xargs etags -l c --append
 	find . -type f -name '*.cc' |xargs etags -l c++ --append
 	find . -type f -name '*.hh' |xargs etags -l c++ --append
+	find protobuf/proto -type f -name '*.proto' |xargs etags -l c++ --append
 
 .PHONY: swish
 swish:

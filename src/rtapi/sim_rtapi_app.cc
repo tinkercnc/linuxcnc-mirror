@@ -87,14 +87,15 @@ static struct rusage rusage;
 static unsigned long minflt, majflt;
 
 static int harden_rt(void);
-static int usr_msglevel = RTAPI_MSG_INFO ;
-static int rt_msglevel = RTAPI_MSG_INFO ;
+static int usr_msglevel = RTAPI_MSG_INFO ; 
+static int rt_msglevel = RTAPI_MSG_INFO ; 
 
 static int halsize = 262000; //FIXME
-static int instance_id;
+static int instance_id; 
 static flavor_ptr flavor;
-static char *rtlibpath = EMC2_RTLIB_DIR;
+static const char *rtlibpath = EMC2_RTLIB_DIR;
 static int use_drivers = 0;
+static int foreground;
 
 static rtapi_switch_t *rtsw; // dont collide with rtapi_switch in hal_lib.so
 static global_data_t *gd;    // dont collide with global_data in instance.so
@@ -106,6 +107,7 @@ rtapi_switch_t *rtapi_switch = NULL;
 global_data_t *global_data = NULL;
 #endif
 
+//ringbuffer_t rtapi_message_buffer;   // rtapi_message ring access strcuture
 static int force_exit = 0;
 
 static int init_actions(int instance, int hal_size, int rtlevel, int userlevel);
@@ -114,7 +116,7 @@ static void exit_actions(void);
 static int do_newinst_cmd(string type, string name, string arg) {
     void *module = modules["hal_lib"];
     if(!module) {
-        rtapi_print_msg(RTAPI_MSG_ERR, 
+        rtapi_print_msg(RTAPI_MSG_ERR,
 		  "newinst: hal_lib is required, but not loaded\n");
         return -1;
     }
@@ -122,14 +124,14 @@ static int do_newinst_cmd(string type, string name, string arg) {
     hal_comp_t *(*find_comp_by_name)(char*) =
         DLSYM<hal_comp_t*(*)(char *)>(module, "halpr_find_comp_by_name");
     if(!find_comp_by_name) {
-        rtapi_print_msg(RTAPI_MSG_ERR, 
+        rtapi_print_msg(RTAPI_MSG_ERR,
 		  "newinst: halpr_find_comp_by_name not found\n");
         return -1;
     }
 
     hal_comp_t *comp = find_comp_by_name((char*)type.c_str());
     if(!comp) {
-        rtapi_print_msg(RTAPI_MSG_ERR, 
+        rtapi_print_msg(RTAPI_MSG_ERR,
 		  "newinst: component %s not found\n", type.c_str());
         return -1;
     }
@@ -251,8 +253,8 @@ static int do_load_cmd(string name, vector<string> args) {
 	if (module_path(flavor, what,
 			rtlibpath, name.c_str(),
 			flavor->mod_ext)) {
-	    rtapi_print_msg(RTAPI_MSG_ERR,
-			    "%s: cannot locate module %s:  %s \n",
+	    rtapi_print_msg(RTAPI_MSG_ERR, 
+			    "%s: cannot locate module %s:  %s \n", 
 			    what,name.c_str(),
 			    strerror(errno));
             return -1;
@@ -263,28 +265,26 @@ static int do_load_cmd(string name, vector<string> args) {
             rtapi_print_msg(RTAPI_MSG_ERR, "%s: dlopen: %s\n", name.c_str(), dlerror());
             return -1;
         }
-
 	// retrieve the address of rtapi_switch_struct
 	// so rtapi functions can be called and members
-	// access
-	// NB: the reference may NOT be called rtapi_switch or
+	// access 
+	// NB: the reference may NOT be called rtapi_switch or 
 	// it might hide rtapi_switch definitions in modules
 	if (rtsw == NULL) {
 
 	    rtapi_get_handle_t rtapi_get_handle;
-	    dlerror();
+    	    dlerror();
 	    rtapi_get_handle = (rtapi_get_handle_t) dlsym(module, "rtapi_get_handle");
 	    if (rtapi_get_handle != NULL) {
 		rtsw = rtapi_get_handle();
 		assert(rtsw != NULL);
-		rtapi_print_msg(RTAPI_MSG_DBG,
-				"rtapi_app: handle:%d retrieved %s %s\n",
+		rtapi_print_msg(RTAPI_MSG_DBG, 
+				"rtapi_app: handle:%d retrieved %s %s\n", 
 				instance_id,
 				rtsw->thread_flavor_name,
 				rtsw->git_version);
 	    }
 	}
-
 	/// XXX handle arguments
         int (*start)(void) = DLSYM<int(*)(void)>(module, "rtapi_app_main");
         if(!start) {
@@ -297,12 +297,13 @@ static int do_load_cmd(string name, vector<string> args) {
         if(result < 0) { dlclose(module); return -1; }
 
         if ((result=start()) < 0) {
-            rtapi_print_msg(RTAPI_MSG_ERR, "rtapi_app_main(%s): %d %s\n",
+            rtapi_print_msg(RTAPI_MSG_ERR, "rtapi_app_main(%s): %d %s\n", 
 		      name.c_str(), result, strerror(-result));
 	    modules.erase(modules.find(name));
 	    return result;
         }
 	rtapi_print_msg(RTAPI_MSG_DBG, "%s: loaded from %s\n", name.c_str(), what);
+
 	// retrieve the address of the global segment
 	// this is set only after rtapi_app_main returns sucessfully
 	if (gd == NULL) {
@@ -317,9 +318,12 @@ static int do_load_cmd(string name, vector<string> args) {
 				"rtapi_app:%d global_data=%p retrieved\n",
 				instance_id, gd);
 
-	    } else
-		rtapi_print_msg(RTAPI_MSG_ERR, "foo: get_global_handle %s\n",dlerror());
+		// rtapi_ringbuffer_init(&gd->error_ring, &rtapi_message_buffer);
+		// rtapi_message_buffer.header->refcount++;
+		// start rtapi_message_buffer reading thread here
+		//
 
+	    }
 	}
 	return 0;
     }
@@ -337,7 +341,7 @@ static int do_unload_cmd(string name) {
 	if(stop) stop();
 	modules.erase(modules.find(name));
         dlclose(w);
-	rtapi_print_msg(RTAPI_MSG_DBG, "instance:%d '%s' unloaded\n",
+	rtapi_print_msg(RTAPI_MSG_DBG, "instance:%d '%s' unloaded\n", 
 		  instance_id, name.c_str());
     }
     return 0;
@@ -456,15 +460,15 @@ static void exit_actions()
 {
     do_unload_cmd("hal_lib");
     do_unload_cmd("rtapi");
-    //    do_unload_cmd("instance");
     gd = NULL;
 }
 
 static int init_actions(int instance, int hal_size, int rtlevel, int userlevel)
 {
-    vector<string> args;
+    vector<string> args, noargs;
     string arg;
     char buff[100];
+    int retval;
 
     args.push_back(string("rtapi"));
     snprintf(buff, sizeof(buff), "rtapi_instance=%d", instance);
@@ -476,39 +480,43 @@ static int init_actions(int instance, int hal_size, int rtlevel, int userlevel)
     snprintf(buff, sizeof(buff), "user_msg_level=%d", userlevel);
     args.push_back(string(buff));
 
-    return do_load_cmd("rtapi", args);
+    retval =  do_load_cmd("rtapi", args);
+    if (retval)
+	return retval;
+    return do_load_cmd("hal_lib", noargs);
 }
 
 static char proctitle[20];
 
-static int master(int argc, char **argv, int fd, vector<string> args) {
+static int master(size_t  argc, char **argv, int fd, vector<string> args) {
 
     int retval;
 
-    pid_t pid = fork();
-    if (pid > 0) { // parent
-	exit(0);
+    if (!foreground) {
+	pid_t pid = fork();
+	if (pid > 0) { // parent
+	    exit(0);
+	}
+	if (pid < 0) { // fork failed
+	    perror("fork");
+	    exit(1);
+	}
     }
-    if (pid < 0) { // fork failed
-	perror("fork");
-	exit(1);
-    }
-
 
     // set new process name
     snprintf(proctitle, sizeof(proctitle), "rtapi:%d",instance_id);
     size_t argv0_len = strlen(argv[0]);
     size_t procname_len = strlen(proctitle);
     size_t max_procname_len = (argv0_len > procname_len) ? (procname_len) : (argv0_len);
-
+    
     strncpy(argv[0], proctitle, max_procname_len);
     memset(&argv[0][max_procname_len], '\0', argv0_len - max_procname_len);
-
+    
     for (size_t i = 1; i < argc; i++) {
 	memset(argv[i], '\0', strlen(argv[i]));
     }
-    rtapi_openlog(proctitle, rt_msglevel );
-
+    //rtapi_openlog(proctitle, rt_msglevel );
+    rtapi_set_logtag("rtapi_app");
     rtapi_set_msg_level(rt_msglevel);
     rtapi_print_msg(RTAPI_MSG_INFO, "master:%d started", instance_id);
 
@@ -525,9 +533,8 @@ static int master(int argc, char **argv, int fd, vector<string> args) {
 	exit(1);
     }
     assert(gd != NULL);
-
+    
     gd->rtapi_app_pid = getpid();
-
     if(args.size()) { 
         int result = handle_command(args);
         if(result != 0) return result;
@@ -578,20 +585,20 @@ static int configure_memory(void) {
 	if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
 	    rtapi_print_msg(RTAPI_MSG_WARN, 
 		      "mlockall() failed: %d '%s'\n",
-		      errno,strerror(errno));
+		      errno,strerror(errno)); 
 	    return 1;
 	}
 #endif
 
 	/* Turn off malloc trimming.*/
 	if (!mallopt(M_TRIM_THRESHOLD, -1)) {
-	    rtapi_print_msg(RTAPI_MSG_WARN,
+	    rtapi_print_msg(RTAPI_MSG_WARN, 
 		      "mallopt(M_TRIM_THRESHOLD, -1) failed\n");
 	    return 1;
 	}
 	/* Turn off mmap usage. */
 	if (!mallopt(M_MMAP_MAX, 0)) {
-	    rtapi_print_msg(RTAPI_MSG_WARN,
+	    rtapi_print_msg(RTAPI_MSG_WARN, 
 		      "mallopt(M_MMAP_MAX, -1) failed\n");
 	    return 1;
 	}
@@ -620,8 +627,7 @@ static int configure_memory(void) {
 	return 0;
 }
 
-
-extern "C" void
+extern "C" void 
 backtrace_handler(int sig, siginfo_t *si, void *uctx)
 {
     void *buffer[BACKTRACE_SIZE];
@@ -630,7 +636,7 @@ backtrace_handler(int sig, siginfo_t *si, void *uctx)
 
     if ((flavor->id == RTAPI_XENOMAI_USER_ID) &&
 	(sig == SIGXCPU))
-	rtapi_print_msg(RTAPI_MSG_ERR,
+	rtapi_print_msg(RTAPI_MSG_ERR, 
 		  "rtapi_app:%d: Xenomai switched RT task to secondary domain\n",
 		  instance_id);
     else
@@ -646,22 +652,22 @@ backtrace_handler(int sig, siginfo_t *si, void *uctx)
     } else {
 	for (j = 0; j < nptrs; j++) {
 	    char *s =  strings[j];
-	    if (s && strlen(s))
-		rtapi_print_msg(RTAPI_MSG_ERR,s);
+	    if (s && strlen(s)) 
+		rtapi_print_msg(RTAPI_MSG_ERR,"%s", s);
 	}
 	free(strings);
     }
-    rtapi_print_msg(RTAPI_MSG_ERR, "rtapi_app:%d exiting%s",
+    rtapi_print_msg(RTAPI_MSG_ERR, "rtapi_app:%d exiting%s", 
 	      instance_id,
 	      sig == SIGSEGV ? ", core dumped" : "");
-    rtapi_closelog();
+    //rtapi_closelog();
 
     if (gd)
 	gd->rtapi_app_pid = 0;
 
     if (sig == SIGSEGV) {
 	sleep(1); // let syslog drain or we might loose
-	abort();  // some important stuff
+      	abort();  // some important stuff
     }
     exit(sig);
 }
@@ -670,7 +676,7 @@ static void
 exit_handler(void)
 {
     struct rusage rusage;
-	
+
     getrusage(RUSAGE_SELF, &rusage);
     if ((rusage.ru_majflt - majflt) > 0) {
 	// RTAPI already shut down here
@@ -699,12 +705,12 @@ static int harden_rt()
 		  "prctl(PR_SET_DUMPABLE) failed: no core dumps will be created - %d - %s\n",
 		  errno, strerror(errno));
 
-    configure_memory();    
+    configure_memory();
 
     if (getrusage(RUSAGE_SELF, &rusage)) {
 	rtapi_print_msg(RTAPI_MSG_WARN, 
 		  "getrusage(RUSAGE_SELF) failed: %d '%s'\n",
-		  errno,strerror(errno));
+		  errno,strerror(errno)); 
     } else {
 	minflt = rusage.ru_minflt;
 	majflt = rusage.ru_majflt;
@@ -712,11 +718,12 @@ static int harden_rt()
 	if (atexit(exit_handler)) {
 	    rtapi_print_msg(RTAPI_MSG_WARN, 
 		      "atexit() failed: %d '%s'\n",
-		      errno,strerror(errno));
+		      errno,strerror(errno)); 
 	}
     }
 
-    setsid(); // Detach from the parent session
+    if (!foreground)
+	setsid(); // Detach from the parent session
 
     sigemptyset( &sig_act.sa_mask );
     sig_act.sa_handler = SIG_IGN; 
@@ -795,13 +802,22 @@ static int harden_rt()
     return 0;
 }
 
-static void usage(int argc, char **argv)
+#define RTPRINTBUFFERLEN 1024
+void foreground_rtapi_msg_handler(msg_level_t level, const char *fmt,
+				  va_list ap) {
+    char buf[RTPRINTBUFFERLEN];
+    vsnprintf(buf, RTPRINTBUFFERLEN, fmt, ap);
+    fprintf(stderr, "%s", buf);
+}
+
+static void usage(int argc, char **argv) 
 {
     printf("Usage:  %s [options]\n", argv[0]);
 }
 
 static struct option long_options[] = {
-    {"help",  no_argument,       0, 'h'},
+    {"help",  no_argument,          0, 'h'},
+    {"foreground",  no_argument,    0, 'F'},
     {"halsize",  required_argument, 0, 'H'},
     {"usrmsglevel", required_argument, 0, 'u'},
     {"rtmsglevel", required_argument, 0, 'r'},
@@ -820,7 +836,7 @@ int main(int argc, char **argv)
     while (1) {
 	int option_index = 0;
 	int curind = optind;
-	c = getopt_long (argc, argv, "hH:m:I:f:r:u:R:N",
+	c = getopt_long (argc, argv, "hH:m:I:f:r:u:R:NF",
 			 long_options, &option_index);
 	if (c == -1)
 	    break;
@@ -831,6 +847,11 @@ int main(int argc, char **argv)
 	    use_drivers = 1;
 	    break;
 
+	case 'F':
+	    foreground = 1;
+	    rtapi_set_msg_handler(foreground_rtapi_msg_handler);
+	    break;
+
 	case 'H':
 	    halsize = atoi(optarg);
 	    break;
@@ -839,11 +860,11 @@ int main(int argc, char **argv)
 	    usr_msglevel = atoi(optarg);
 	    break;
 
-	case 'r':
+     	case 'r':
 	    rt_msglevel = atoi(optarg);
 	    break;
 
-	case 'R':
+     	case 'R':
 	    rtlibpath = strdup(optarg);
 	    break;
 
@@ -858,11 +879,11 @@ int main(int argc, char **argv)
 		while (f->name) {
 		    fprintf(stderr, "\t%s\n", f->name);
 		    f++;
-		}
+		} 
 		exit(1);
 	    }
 	    break;
-
+ 
 	case '?':
 	    if (optopt)  fprintf(stderr, "bad short opt '%c'\n", optopt);
 	    else  fprintf(stderr, "bad long opt \"%s\"\n", argv[curind]);
@@ -885,7 +906,7 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
-    snprintf(addr.sun_path, sizeof(addr.sun_path),
+    snprintf(addr.sun_path, sizeof(addr.sun_path), 
 	     SOCKET_PATH, instance_id);
     addr.sun_path[0] = '\0';
 
@@ -913,7 +934,7 @@ become_master:
         if(result != 0) { perror("listen"); exit(1); }
         result = master(argc, argv, fd, args);
         unlink(SOCKET_PATH);
-	rtapi_print_msg(RTAPI_MSG_INFO, "master:%d exit %d\n",
+	rtapi_print_msg(RTAPI_MSG_INFO, "master:%d exit %d\n", 
 		  instance_id, result);
         return result;
     } else if(errno == EADDRINUSE) {
@@ -930,7 +951,7 @@ become_master:
         }
         if(result < 0 && errno == ECONNREFUSED) { 
             unlink(SOCKET_PATH);
-	    rtapi_print_msg(RTAPI_MSG_WARN,
+	    rtapi_print_msg(RTAPI_MSG_WARN, 
 			    "slave:%d:  Waited 3 seconds for master.  giving up.",
 			    instance_id);
             close(fd);
@@ -939,8 +960,8 @@ become_master:
         if(result < 0) { perror("connect"); exit(1); }
         return slave(fd, args);
     } else {
-	rtapi_print_msg(RTAPI_MSG_WARN,
-		   "instance:%d:  bind failed: %s",
+	rtapi_print_msg(RTAPI_MSG_WARN, 
+		   "instance:%d:  bind failed: %s", 
 		   instance_id, strerror(errno));
         perror("bind"); exit(1);
     }

@@ -19,10 +19,7 @@
 
 #define MAX_ERRORS 3
 
-static RT_HEAP shmem_heap_array[RTAPI_MAX_SHMEMS + 1];        
-
 #ifdef RTAPI
-static RT_HEAP master_heap;
 static rthal_trap_handler_t old_trap_handler;
 static int rtapi_trap_handler(unsigned event, unsigned domid, void *data);
 static struct rt_stats_struct {
@@ -33,10 +30,7 @@ static struct rt_stats_struct {
 				   by Xenomai */
 } rt_stats;
 
-#else /* ULAPI */
-static RT_HEAP ul_rtapi_heap_desc;
-
-#endif /* ULAPI */
+#endif /* RTAPI */
 
 
 
@@ -50,13 +44,6 @@ void init_rtapi_data_hook(rtapi_data_t * data) {
     rt_stats.rt_last_overrun = 0;
     rt_stats.rt_total_overruns = 0;
 #endif
-
-#if 0
-    for (n = 0; n <= RTAPI_MAX_SHMEMS; n++) {
-	memset(&shmem_heap_array[n].heap, 0, sizeof(shmem_heap_array[n]));
-    }
-#endif
-
 }
 
 
@@ -65,28 +52,6 @@ void init_rtapi_data_hook(rtapi_data_t * data) {
 ************************************************************************/
 
 #ifdef RTAPI
-int _rtapi_module_master_shared_memory_init(rtapi_data_t **rtapi_data) {
-    int n;
-
-    /* get master shared memory block from OS and save its address */
-    if ((n = rt_heap_create(&master_heap, MASTER_HEAP, 
-			    sizeof(rtapi_data_t), H_SHARED)) != 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI: ERROR: rt_heap_create(rtapi) returns %d\n", n);
-	return -EINVAL;
-    }
-    if ((n = rt_heap_alloc(&master_heap, 0, TM_INFINITE,
-			   (void **)rtapi_data)) != 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI: ERROR: rt_heap_alloc(rtapi) returns %d\n", n);
-	return -EINVAL;
-    }
-    return 0;
-}
-
-void _rtapi_module_master_shared_memory_free(void) {
-    rt_heap_delete(&master_heap);
-}
 
 void _rtapi_module_init_hook(void) {
     old_trap_handler = \
@@ -95,7 +60,6 @@ void _rtapi_module_init_hook(void) {
 
 void _rtapi_module_cleanup_hook(void) {
     /* release master shared memory block */
-    _rtapi_module_master_shared_memory_free();
     rthal_trap_catch(old_trap_handler);
 }
 #endif /* RTAPI */
@@ -124,13 +88,13 @@ long long int _rtapi_get_clocks_hook(void) {
     return rt_timer_tsc();
 }
 
-void _rtapi_clock_set_period_hook(long int nsecs, RTIME *counts,
+void _rtapi_clock_set_period_hook(long int nsecs, RTIME *counts, 
 				 RTIME *got_counts) {
     rtapi_data->timer_period = *got_counts = (RTIME) nsecs; 
 }
 
 
-void _rtapi_delay_hook(long int nsec)
+void _rtapi_delay_hook(long int nsec) 
 {
     long long int release = rt_timer_tsc() + nsec;
     while (rt_timer_tsc() < release);
@@ -282,143 +246,7 @@ int _rtapi_task_start_hook(task_data *task, int task_id,
 }
 
 
-#else /* ULAPI */
-rtapi_data_t *_rtapi_init_hook() {
-    int retval;
-    rtapi_data_t *rtapi_data;
-
-    if ((retval = rt_heap_bind(&ul_rtapi_heap_desc, MASTER_HEAP, TM_INFINITE))) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI: ERROR: rtapi_init: rt_heap_bind() "
-			"returns %d\n",
-			retval);
-	return NULL;
-    }
-    if ((retval = rt_heap_alloc(&ul_rtapi_heap_desc, 0,
-				TM_NONBLOCK, (void **)&rtapi_data)) != 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI: ERROR: rt_heap_alloc(rtapi) returns %d \n",
-			retval);
-	return NULL;
-    }
-
-    //rtapi_printall();
-    return rtapi_data;
-}
-
-
 #endif /* ULAPI */
-
-/***********************************************************************
-*                           rtapi_shmem.c                              *
-************************************************************************/
-
-#ifdef RTAPI
-void *_rtapi_shmem_new_realloc_hook(int shmem_id, int key,
-				   unsigned long int size) {
-    rtapi_print_msg(RTAPI_MSG_ERR, 
-		    "RTAPI: UNSUPPORTED OPERATION - cannot map "
-		    "user segment %d into kernel\n",shmem_id);
-    return NULL;
-}
-
-#else  /* ULAPI */
-void *_rtapi_shmem_new_realloc_hook(int shmem_id, int key,
-				   unsigned long int size) {
-    char shm_name[20];
-    int retval;
-    void *shmem_addr;
-
-    snprintf(shm_name, sizeof(shm_name), "shm-%d:%d", shmem_id, rtapi_instance);
-
-    if (shmem_addr_array[shmem_id] == NULL) {
-	if ((retval = rt_heap_bind(&shmem_heap_array[shmem_id], shm_name,
-				   TM_INFINITE))) {
-	    rtapi_print_msg(RTAPI_MSG_ERR, 
-			    "ULAPI: ERROR: rtapi_shmem_new: "
-			    "rt_heap_bind(%s) returns %d\n", 
-			    shm_name, retval);
-	    return NULL;
-	}
-	if ((retval = rt_heap_alloc(&shmem_heap_array[shmem_id], 0,
-				    TM_NONBLOCK, (void**)&shmem_addr)) != 0) {
-	    rtapi_print_msg(RTAPI_MSG_ERR,
-			    "RTAPI: ERROR: rt_heap_alloc() returns %d\n",
-			    retval);
-	    return NULL;
-	}
-    } else {
-	rtapi_print_msg(RTAPI_MSG_DBG,
-			"ulapi %s already mapped \n",shm_name);
-	return shmem_addr_array[shmem_id];
-    }
-    return shmem_addr;
-}
-#endif  /* ULAPI */
-
-
-#ifdef RTAPI
-void * _rtapi_shmem_new_malloc_hook(int shmem_id, int key,
-				   unsigned long int size) {
-    char shm_name[20];
-    void *shmem_addr;
-    int retval;
-
-    snprintf(shm_name, sizeof(shm_name), "shm-%d:%d", shmem_id, rtapi_instance);
-    if ((retval = rt_heap_create(&shmem_heap_array[shmem_id], shm_name, 
-			    size, H_SHARED)) != 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI: ERROR: rt_heap_create() returns %d\n", retval);
-	return NULL;
-    }
-    if ((retval = rt_heap_alloc(&shmem_heap_array[shmem_id], 0, TM_INFINITE,
-				(void **)&shmem_addr)) != 0) {
-	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI: ERROR: rt_heap_alloc() returns %d\n", retval);
-	return NULL;
-    }
-    return shmem_addr;
-}
-
-
-#else  /* ULAPI */
-void * _rtapi_shmem_new_malloc_hook(int shmem_id, int key,
-				   unsigned long int size) {
-    char shm_name[20];
-    void *shmem_addr;
-    int retval;
-
-    snprintf(shm_name, sizeof(shm_name), "shm-%d:%d", shmem_id, rtapi_instance);
-
-    if (shmem_addr_array[shmem_id] == NULL) {
-	snprintf(shm_name, sizeof(shm_name), "shm-%d:%d", shmem_id, rtapi_instance);
-	if ((retval = rt_heap_create(&shmem_heap_array[shmem_id], shm_name,
-				     size, H_SHARED))) {
-	    rtapi_print_msg(RTAPI_MSG_ERR, 
-			    "RTAPI: ERROR: rtapi_shmem_new: "
-			    "rt_heap_create(%s,%ld) returns %d\n", 
-			    shm_name, size, retval);
-	    return NULL;
-	}
-	if ((retval = rt_heap_alloc(&shmem_heap_array[shmem_id], 0,
-				    TM_INFINITE, (void **)&shmem_addr)) != 0) {
-	    rtapi_print_msg(RTAPI_MSG_ERR, 
-			    "RTAPI: ERROR: rt_heap_alloc() returns %d - %s\n", 
-			    retval, strerror(retval));
-	    return NULL;
-	}
-    } else {
-	rtapi_print_msg(RTAPI_MSG_DBG, "ULAPI: %s already mapped\n", shm_name);
-    }
-
-    return shmem_addr;
-}
-#endif /* ULAPI */
-
-
-void _rtapi_shmem_delete_hook(shmem_data *shmem,int shmem_id) {
-    rt_heap_delete(&shmem_heap_array[shmem_id]);
-}
 
 
 /***********************************************************************
@@ -434,3 +262,4 @@ void rtapi_proc_read_status_hook(char *page, char **start, off_t off,
     PROC_PRINT_DONE;
 }
 #endif
+

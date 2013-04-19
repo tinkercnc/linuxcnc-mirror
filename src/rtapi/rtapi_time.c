@@ -46,7 +46,7 @@ unsigned long timer_counts;
 
 
 #ifdef HAVE_RTAPI_CLOCK_SET_PERIOD_HOOK
-void _rtapi_clock_set_period_hook(long int nsecs, RTIME *counts,
+void _rtapi_clock_set_period_hook(long int nsecs, RTIME *counts, 
 				 RTIME *got_counts);
 #endif
 

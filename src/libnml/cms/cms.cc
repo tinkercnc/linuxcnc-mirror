@@ -380,7 +380,7 @@ CMS::CMS(const char *bufline_in, const char *procline_in, int set_to_server)
 	    neutral_encoding_method = CMS_XDR_ENCODING;
 	    continue;
 	}
-
+	
 	char *instance_env = getenv("INSTANCE");
 	if (instance_env != NULL)
 	    instance_no = atoi(instance_env);

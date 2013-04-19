@@ -335,6 +335,29 @@ AC_ARG_WITH(platform,
       TARGET_PLATFORM="$PLATFORM"
     ])
 
+AC_MSG_CHECKING(whether to build protobuf bindings)
+AC_ARG_ENABLE(protobuf,
+    [  --enable-protobuf      generate protobuf-dependent code],
+    [
+	USE_PROTOBUF=yes
+        AC_MSG_RESULT([configuring for protobuf bindings])
+    ],
+    [
+      AC_MSG_RESULT([not generating protobuf bindings])
+      USE_PROTOBUF=no
+    ])
+
+AC_MSG_CHECKING(whether to build code depending on zeroMQ)
+AC_ARG_ENABLE(zeromq,
+    [  --enable-zeromq      generate zeroMQ-dependent code],
+    [
+	USE_ZEROMQ=yes
+        AC_MSG_RESULT([configuring for zeroMQ use])
+    ],
+    [
+      AC_MSG_RESULT([not relying on zeroMQ])
+      USE_ZEROMQ=no
+    ])
 
 AC_MSG_CHECKING(whether to build programming examples)
 AC_ARG_ENABLE(examples,
@@ -346,6 +369,28 @@ AC_ARG_ENABLE(examples,
     [
       AC_MSG_RESULT([not building example programs])
       BUILD_EXAMPLES=no
+    ])
+
+AC_MSG_CHECKING(whether to use the common shared memory driver)
+AC_ARG_ENABLE(shmdrv,
+    [  --enable-shmdrv      use the common shared memory driver kernel module],
+    [
+        case "$enableval" in
+            Y*|y*)
+		USE_SHMDRV=yes
+                AC_MSG_RESULT([explicitly configuring for common shared memory driver kernel module])
+            ;;
+            N*|n*)
+		USE_SHMDRV=no
+                AC_MSG_RESULT([explicitly disabling shared memory driver kernel module])
+            ;;
+        esac
+	if test -z "USE_SHMDRV"; then
+	   AC_MSG_ERROR([ I dont understand $enableval, just yes or no ]) 
+	fi
+    ],
+    [
+      AC_MSG_RESULT([default is no])
     ])
 
 AC_MSG_CHECKING(whether to build hardware drivers)
@@ -970,11 +1015,25 @@ if test "$BUILD_DRIVERS" = yes; then
 fi
 AC_SUBST(BUILD_DRIVERS)
 
+if test "$USE_SHMDRV" = yes; then
+   AC_DEFINE(USE_SHMDRV, [], [use shm driver module])
+fi
+AC_SUBST(USE_SHMDRV)
+
+AC_SUBST(USE_PROTOBUF)
+if test "$USE_PROTOBUF" = yes; then
+   AC_DEFINE(USE_PROTOBUF, [], [protobuf bindings available])
+fi
+
+AC_SUBST(USE_ZEROMQ)
+if test "$USE_ZEROMQ" = yes; then
+   AC_DEFINE(USE_ZEROMQ, [], [zeroMQ library available])
+fi
+
 AC_SUBST(BUILD_EXAMPLES)
 if test "$BUILD_EXAMPLES" = yes; then
    AC_DEFINE(BUILD_EXAMPLES, [], [build programming examples])
 fi
-
 if test "$USERMODE_PCI" = yes; then
    AC_DEFINE(USERMODE_PCI, [], [build PCI drivers with usermode PCI support])
 fi
@@ -1787,6 +1846,19 @@ AH_TOP([/********************************************************************
 
 #define MM_PER_INCH 25.4
 #define INCH_PER_MM (1.0/25.4)
+
+/* RTAPI array sizes */
+#define RTAPI_MAX_MODULES	64
+#define RTAPI_MAX_TASKS		64
+#define RTAPI_MAX_SHMEMS	32
+#define RTAPI_MAX_RINGS	        32
+
+#define MAX_INSTANCES           16
+
+// default size of the HAL data segment
+// can be overridden by the rtapi.so/ko module param hal_size=<n>
+#define HAL_SIZE                262000
+
 ])
 
 AH_VERBATIM([_GNU_SOURCE],

@@ -1,4 +1,3 @@
-
 #include "config.h"
 #include "rtapi.h"
 
@@ -136,7 +135,7 @@ flavor_ptr flavor_byid(int flavor_id)
 flavor_ptr default_flavor(void)
 {
 
-
+   
 
     // hack around single target builds for now
     // force default to waht we built for
@@ -170,31 +169,31 @@ flavor_ptr default_flavor(void)
 #endif
 }
 
-int module_path(flavor_ptr f,
+int module_path(flavor_ptr f, 
 		char *result,
-		const char *libpath,
-		const char *basename,
+		const char *libpath, 
+		const char *basename, 
 		const char *ext)
 {
     struct stat sb;
 
     if (!uts.release[0])
 	uname(&uts);
-
+	
     snprintf(result, PATH_MAX, "%s/%s/%s/%s%s",
-	     libpath, f->name, uts.release,
+	     libpath, f->name, uts.release, 
 	     basename, ext);
     if ((stat(result, &sb) == 0)  && (S_ISREG(sb.st_mode)))
 	return 0;
 
     snprintf(result, PATH_MAX, "%s/%s/%s%s",
-	     libpath, f->name,
+	     libpath, f->name,  
 	     basename, ext);
     if ((stat(result, &sb) == 0)  && (S_ISREG(sb.st_mode)))
 	return 0;
-
+   
     snprintf(result, PATH_MAX, "%s/%s%s",
-	     libpath,
+	     libpath, 
 	     basename, ext);
     if ((stat(result, &sb) == 0)  && (S_ISREG(sb.st_mode)))
 	return 0;

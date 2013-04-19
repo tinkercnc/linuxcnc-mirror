@@ -112,6 +112,18 @@ USE_ZEROMQ=@USE_ZEROMQ@
 # example programs
 BUILD_EXAMPLES=@BUILD_EXAMPLES@
 
+# shared memory kernel driver
+USE_SHMDRV=@USE_SHMDRV@
+
+# Google protobuf
+USE_PROTOBUF=@USE_PROTOBUF@
+
+# zeroMQ messaging
+USE_ZEROMQ=@USE_ZEROMQ@
+
+# example programs
+BUILD_EXAMPLES=@BUILD_EXAMPLES@
+
 #libudev for if USERMODE_PCI==yes
 LIBUDEV_CFLAGS=@LIBUDEV_CFLAGS@
 LIBUDEV_LIBS=@LIBUDEV_LIBS@

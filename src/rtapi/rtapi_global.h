@@ -23,7 +23,7 @@
     nowadays 'posix threads') session, or a an RT session as supported
     by the currently running kernel
 
-    Dynamic sizing values, e.g. the HAL shm segment size. These values
+    Dynamic sizing values, e.g. the HAL shm segment size. These values 
     change from 'compiled in' to 'startup parameter'.
 
     Data which should be shared within a session, for instance, the
@@ -31,28 +31,43 @@
 
     Support data:
 
-    a global counter for the next module ID (next_module_id) which is
+    a global counter for the next module ID (next_module_id) which is 
     needed by userland threadstyles since they do not arrays for modules.
     (this was formerly Jeff Epler's 'uuid' mechanism).
 
     Other possible uses of global_data include, but are not limited to,
-    for instance instance management if one were to support multiple
+    for instance instance management if one were to support multiple 
     HAL/RTAPI instances within a single machine.
 */
 #include "rtapi_shmkeys.h"
 
+
+#define MESSAGE_RING_SIZE 32768
+#define INSTANCE_NAME_LENGTH 32
+
 // the universally shared global structure
 typedef struct {
     int magic;
-    int layout_version;
+    int layout_version; 
     unsigned long mutex;
     int instance_id;
-    int rtapi_thread_flavor;
-    int rt_msg_level;              // message level for RT
-    int user_msg_level;            // message level for non-RT
+    // this is set once on startup and is to be considered a constant
+    // throughout the session:
+    char instance_name[INSTANCE_NAME_LENGTH];
+    int rtapi_thread_flavor; 
+    int rt_msg_level;              // message level for RT 
+    int user_msg_level;            // message level for non-RT 
     int next_module_id;            // for userland threads module id's
     int hal_size;                  // make HAL data segment size configurable
     int rtapi_app_pid;
+    int rtapi_msgd_pid;
+    int error_ring_full;
+    int error_ring_locked;
+    ringheader_t rtapi_messages;   // ringbuffer for RTAPI messages
+    char buf[SIZE_ALIGN(MESSAGE_RING_SIZE)];
+    ringtrailer_t rtapi_messages_trailer;
+    // caveat - if rtapi_messages had a scratchpad, it would go here:
+    // char buf[SIZE_ALIGN(MESSAGE_RING_SCRATCHPAD_SIZE)];
 } global_data_t;
 
 #define GLOBAL_LAYOUT_VERSION 42   // bump on layout changes of global_data_t

@@ -63,10 +63,8 @@
   RTAPI_SERIAL should be bumped with changes that break compatibility
   with previous versions.
 */
-#define RTAPI_SERIAL 1
-
+#define RTAPI_SERIAL 2
 #include "config.h"
-#include "rtapi_global.h"
 
 #if ( !defined RTAPI ) && ( !defined ULAPI )
 #error "Please define either RTAPI or ULAPI!"
@@ -103,6 +101,7 @@ typedef __s64		s64;
 # include <asm/types.h>
 #endif
 
+
 /* LINUX_VERSION_CODE for rtapi_{module,io}.c */
 #ifdef MODULE
 #ifndef LINUX_VERSION_CODE
@@ -114,6 +113,8 @@ typedef __s64		s64;
 #endif
 
 #include <rtapi_errno.h>
+#include <rtapi_ring.h>
+#include <rtapi_global.h>
 
 #define RTAPI_NAME_LEN   31	/* length for module, etc, names */
 
@@ -170,7 +171,7 @@ typedef int (*rtapi_exit_t)(int);
 extern int _rtapi_exit(int module_id);
 
 /** 'rtapi_next_module_id()' returns a globally unique int ID
-
+    
  */
 typedef int (*rtapi_next_module_id_t)(void);
 #define rtapi_next_module_id()			\
@@ -546,6 +547,15 @@ typedef int (*rtapi_shmem_new_t)(int, int, unsigned long int);
 extern int _rtapi_shmem_new(int key, int module_id,
 			    unsigned long int size);
 
+/** 'rtapi_shmem_new_inst()' does the same for a particular instance.
+ **/
+
+typedef int (*rtapi_shmem_new_inst_t)(int, int, int, unsigned long int);
+#define rtapi_shmem_new_inst(key, instance, module_id, size)	\
+    rtapi_switch->rtapi_shmem_new_inst(key, instance, module_id, size)
+extern int _rtapi_shmem_new_inst(int key, int instance, int module_id,
+			    unsigned long int size);
+
 /** 'rtapi_shmem_delete()' frees the shared memory block associated
     with 'shmem_id'.  'module_id' is the ID of the calling module.
     Returns a status code.  Call only from within user or init/cleanup
@@ -556,20 +566,50 @@ typedef int (*rtapi_shmem_delete_t)(int, int);
     rtapi_switch->rtapi_shmem_delete(shmem_id, module_id)
 extern int _rtapi_shmem_delete(int shmem_id, int module_id);
 
+typedef int (*rtapi_shmem_delete_inst_t)(int, int, int);
+#define rtapi_shmem_delete_inst(shmem_id, instance, module_id)	\
+    rtapi_switch->rtapi_shmem_delete_inst(shmem_id, instance, module_id)
+extern int _rtapi_shmem_delete_inst(int shmem_id, int instance, int module_id);
+
 /** 'rtapi_shmem_getptr()' sets '*ptr' to point to shared memory block
     associated with 'shmem_id'.  Returns a status code.  May be called
     from user code, init/cleanup code, or realtime tasks.
 */
+
 typedef int (*rtapi_shmem_getptr_t)(int, void **);
 #define rtapi_shmem_getptr(shmem_id, ptr)		\
     rtapi_switch->rtapi_shmem_getptr(shmem_id, ptr)
 extern int _rtapi_shmem_getptr(int shmem_id, void **ptr);
 
+typedef int (*rtapi_shmem_getptr_inst_t)(int, int, void **);
+#define rtapi_shmem_getptr_inst(shmem_id, instance, ptr)	\
+    rtapi_switch->rtapi_shmem_getptr_inst(shmem_id, instance, ptr)
+extern int _rtapi_shmem_getptr_inst(int shmem_id, int instance, void **ptr);
+
+/***********************************************************************
+*                        Ringbuffer related functions                  *
+************************************************************************/
+
+typedef int (*rtapi_ring_new_t) (size_t, size_t, int, int);
+#define rtapi_ring_new(size, sp_size, module_id, flags) \
+    rtapi_switch->rtapi_ring_new(size, sp_size, module_id, flags)
+extern int _rtapi_ring_new(size_t size, size_t sp_size, int module_id, int flags);
+
+typedef int (*rtapi_ring_attach_t) (int,ringbuffer_t *, int);
+#define rtapi_ring_attach(handle, ptr, module_id)			\
+    rtapi_switch->rtapi_ring_attach(handle, ptr, module_id)
+extern int _rtapi_ring_attach(int handle, ringbuffer_t *ptr, int module_id);
+
+typedef int (*rtapi_ring_detach_t) (int,int);
+#define rtapi_ring_detach(handle, module_id) \
+    rtapi_switch->rtapi_ring_detach(handle, module_id)
+extern int _rtapi_ring_detach(int handle, int module_id);
+
+// rtapi_ring_refcount(ringheader_t *ptr) defined in rtapi_ring.h
 
 /***********************************************************************
 *                        I/O RELATED FUNCTIONS                         *
 ************************************************************************/
-
 // the rtapi_inb()/rtapi_outb()/rtapi_inw()/rtapi_outw() functions have
 // moved to src/rtapi/rtapi_io.h, including documentation.
 
@@ -676,33 +716,50 @@ typedef struct {
 #endif
     // shared memory functions
     rtapi_shmem_new_t rtapi_shmem_new;
+    rtapi_shmem_new_inst_t rtapi_shmem_new_inst;
     rtapi_shmem_delete_t rtapi_shmem_delete;
+    rtapi_shmem_delete_inst_t rtapi_shmem_delete_inst;
     rtapi_shmem_getptr_t rtapi_shmem_getptr;
+    rtapi_shmem_getptr_inst_t rtapi_shmem_getptr_inst;
+
+    // ringbuffer functions
+    rtapi_ring_new_t rtapi_ring_new;
+    rtapi_ring_attach_t rtapi_ring_attach;
+    rtapi_ring_detach_t rtapi_ring_detach;
+
 } rtapi_switch_t;
 
 // using code is responsible to define this:
 // this extern is not used within RTAPI
 extern rtapi_switch_t *rtapi_switch;
 
-/** 'rtapi_get_handle()' returns a pointer to the rtapi_switch
+/** 'rtapi_get_handle()' returns a pointer to the rtapi_switch 
     structure, such that using code may refernce rtapi
     methods.
  */
 typedef rtapi_switch_t *(*rtapi_get_handle_t)(void);
 extern rtapi_switch_t *rtapi_get_handle(void);
 
+// autorelease the rtapi mutex on scope exit
+// declare a variable like so in the scope to be protected:
+//
+// foo_type foo __attribute__((cleanup(rtapi_autorelease_mutex)));
+//
+// make sure rtapi_mutex_get(&(rtapi_data->mutex));
+// is unconditionally called first thing on scope entry
+extern void rtapi_autorelease_mutex(void *variable);
+
 // exported by instance.c (kstyles) and rtapi_main.c (userlandRT)
 // configurable at rtapi.so module load time _only_
 extern int rtapi_instance;
 
 #ifdef ULAPI
-// technically this is part of instance but we're building the instance
-// module only for kernel thread systems where shared memory init has to
-// happen in-kernel
+// the ulapi constructor and destructor
+// these attach/detach the global and rtapi shm segments to/from ULAPI
 typedef int  (*ulapi_main_t)(int, int, global_data_t **);
-typedef void (*ulapi_exit_t)(void);
+typedef int (*ulapi_exit_t)(int);
 extern int ulapi_main(int instance, int flavor, global_data_t **global);
-extern void ulapi_exit(void);
+extern int ulapi_exit(int instance);
 #endif
 
 /***********************************************************************

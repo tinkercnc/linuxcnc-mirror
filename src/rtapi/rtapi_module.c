@@ -13,6 +13,7 @@
 #include "config.h"		// build configuration
 #include "rtapi.h"		// these functions
 #include "rtapi_common.h"	// RTAPI macros and decls
+#include "rtapi/shmdrv/shmdrv.h"
 
 
 #ifdef MODULE
@@ -33,6 +34,36 @@ extern int rtapi_instance;
 extern void init_rtapi_data(rtapi_data_t * data);
 
 #ifdef RTAPI
+MODULE_AUTHOR("Michael Haberler");
+MODULE_DESCRIPTION("RTAPI module support - kernel threads");
+MODULE_LICENSE("GPL");
+
+// kernel styles do not support multiple instances
+// this just numbers this particular instance to fit with the scheme
+int rtapi_instance;
+
+static char *instance_name = "";
+static int hal_size = HAL_SIZE;                 // default size of HAL data segment
+static int rt_msg_level = RTAPI_MSG_INFO;	/* initial RT message printing level */ 
+static int user_msg_level = RTAPI_MSG_INFO;	/* initial User message printing level */ 
+
+RTAPI_MP_STRING(instance_name,"name of this instance")
+RTAPI_MP_INT(rtapi_instance, "instance ID");
+RTAPI_MP_INT(hal_size, "size of the HAL data segment");
+RTAPI_MP_INT(rt_msg_level, "RT debug message level (default=3)");
+RTAPI_MP_INT(user_msg_level, "user debug message level (default=3)");
+EXPORT_SYMBOL(rtapi_instance);
+EXPORT_SYMBOL(global_data);
+
+global_data_t *global_data = NULL;
+ringbuffer_t rtapi_message_buffer;   // error ring access strcuture
+
+global_data_t *get_global_handle(void)
+{
+    return global_data;
+}
+EXPORT_SYMBOL(get_global_handle);
+
 /* the following are internal functions that do the real work associated
    with deleting tasks, etc.  They do not check the mutex that protects
    the internal data structures.  When someone calls an rtapi_xxx_delete()
@@ -41,9 +72,8 @@ extern void init_rtapi_data(rtapi_data_t * data);
    needs to delete something, it calls these functions directly.
 */
 static int module_delete(int module_id);
-extern int _rtapi_module_master_shared_memory_init(rtapi_data_t **rtapi_data);
+
 extern void _rtapi_module_cleanup_hook(void);
-extern void _rtapi_module_master_shared_memory_free(void);
 
 /***********************************************************************
 *                   INIT AND SHUTDOWN FUNCTIONS                        *
@@ -56,18 +86,54 @@ extern int global_app_main(void);
 extern void global_app_exit(void);
 
 int init_module(void) {
-  int n, res;
+    int n;
+    struct shm_status sm;
+    int retval;
 
   global_app_main();
     /* say hello */
-    rtapi_print_msg(RTAPI_MSG_INFO, "RTAPI:%d %s %s init\n",
+    rtapi_print_msg(RTAPI_MSG_INFO, "RTAPI:%d %s %s init\n", 
 		    rtapi_instance,
-		    rtapi_get_handle()->thread_flavor_name,
+		    rtapi_get_handle()->thread_flavor_name, 
 		    GIT_VERSION);
-    /* get master shared memory block from OS and save its address */
-    res = _rtapi_module_master_shared_memory_init(&rtapi_data);
-    if (res) return res;
-    /* perform a global init if needed */
+
+    sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
+    sm.size = sizeof(global_data_t);
+    sm.flags = 0;
+    if ((retval = shmdrv_create(&sm)) < 0) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: can create global segment: %d\n",
+			rtapi_instance, retval);
+	return -EINVAL;
+    }
+    if ((retval = shmdrv_attach(&sm, (void **)&global_data)) < 0) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: can attach global segment: %d\n",
+			rtapi_instance, retval);
+	return -EINVAL;
+    }
+
+    sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
+    sm.size = sizeof(rtapi_data_t);
+    sm.flags = 0;
+    if ((retval = shmdrv_create(&sm)) < 0) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: can create rtapi segment: %d\n",
+			rtapi_instance, retval);
+	return -EINVAL;
+    }
+    if ((retval = shmdrv_attach(&sm, (void **)&rtapi_data)) < 0) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: cant attach rtapi segment: %d\n",
+			rtapi_instance, retval);
+	return -EINVAL;
+    }
+
+    /* perform a global init */
+    init_global_data(global_data, rtapi_instance,
+		     hal_size, rt_msg_level, user_msg_level, 
+		     instance_name);
+    /* this will take care of any threads flavor hook */
     init_rtapi_data(rtapi_data);
     /* check flavor and serial codes */
     if (rtapi_data->thread_flavor_id != THREAD_FLAVOR_ID) {
@@ -75,7 +141,23 @@ int init_module(void) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"RTAPI: ERROR: flavor mismatch %d vs %d\n",
 			rtapi_data->thread_flavor_id, THREAD_FLAVOR_ID);
-	_rtapi_module_master_shared_memory_free();
+
+	sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
+	sm.size = sizeof(global_data_t);
+	sm.flags = 0;
+	if ((retval = shmdrv_detach(&sm)) < 0) {
+	    rtapi_print_msg(RTAPI_MSG_ERR,
+			    "INSTANCE:%d ERROR: shmdrv_detach() returns %d\n",
+			    rtapi_instance, retval);
+	}
+	sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
+	sm.size = sizeof(global_data_t);
+	sm.flags = 0;
+	if ((retval = shmdrv_detach(&sm)) < 0) {
+	    rtapi_print_msg(RTAPI_MSG_ERR,
+			    "INSTANCE:%d ERROR: shmdrv_detach() returns %d\n",
+			    rtapi_instance, retval);
+	}
 	return -EINVAL;
     }
     if (rtapi_data->serial != RTAPI_SERIAL) {
@@ -83,13 +165,13 @@ int init_module(void) {
 	rtapi_print_msg(RTAPI_MSG_ERR,
 			"RTAPI: ERROR: serial mismatch '%d' vs '%d'\n",
 			rtapi_data->serial, RTAPI_SERIAL);
-	_rtapi_module_master_shared_memory_free();
 	return -EINVAL;
     }
     /* set up local pointers to global data */
     module_array = rtapi_data->module_array;
     task_array = rtapi_data->task_array;
     shmem_array = rtapi_data->shmem_array;
+    ring_array = rtapi_data->ring_array;
 
     /* perform local init */
     for (n = 0; n <= RTAPI_MAX_TASKS; n++) {
@@ -133,7 +215,7 @@ int init_module(void) {
 #endif
 
     /* done */
-    rtapi_print_msg(RTAPI_MSG_INFO, "RTAPI:%d Init complete\n",
+    rtapi_print_msg(RTAPI_MSG_INFO, "RTAPI:%d Init complete\n", 
 		    rtapi_instance);
     return 0;
 }
@@ -143,6 +225,8 @@ that fail to load properly, or fail to clean up after themselves */
 
 void cleanup_module(void) {
     int n;
+    struct shm_status sm;
+    int retval;
 
     if (rtapi_data == NULL) {
 	/* never got inited, nothing to do */
@@ -196,12 +280,30 @@ void cleanup_module(void) {
     proc_clean();
 #endif
 
-    /* perform thread system-specific module cleanups */
-    _rtapi_module_cleanup_hook();
+  /* perform thread system-specific module cleanups */
+   // FIXME check if needed _rtapi_module_cleanup_hook();
 
+    sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
+    sm.size = sizeof(rtapi_data_t);
+    sm.flags = 0;
+    if ((retval = shmdrv_detach(&sm)) < 0) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: detach rtapi returns %d\n",
+			rtapi_instance, retval);
+    }
+    rtapi_data = NULL;
+
+    sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
+    sm.size = sizeof(global_data_t);
+    sm.flags = 0;
+    if ((retval = shmdrv_detach(&sm)) < 0) {
+	rtapi_print_msg(RTAPI_MSG_ERR,
+			"RTAPI:%d ERROR: detach global returns %d\n",
+			rtapi_instance, retval);
+    }
+    global_data = NULL;
     rtapi_print_msg(RTAPI_MSG_INFO, "RTAPI:%d Exit complete\n",
 		    rtapi_instance);
-    global_app_exit();
     return;
 }
 
@@ -219,7 +321,7 @@ int _rtapi_init(const char *modname) {
     int n, module_id;
     module_data *module;
 
-    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI:%d initing module %s\n",
+    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI:%d initing module %s\n", 
 		    rtapi_instance, modname);
     /* get the mutex */
     rtapi_mutex_get(&(rtapi_data->mutex));
@@ -268,7 +370,7 @@ static int module_delete(int module_id) {
     char name[RTAPI_NAME_LEN + 1];
     int n;
 
-    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI:%d module %d exiting\n",
+    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI:%d module %d exiting\n", 
 		    rtapi_instance, module_id);
     /* validate module ID */
     if ((module_id < 1) || (module_id > RTAPI_MAX_MODULES)) {
@@ -326,36 +428,57 @@ static int module_delete(int module_id) {
 
 #else /* ULAPI */
 
-extern rtapi_data_t *_rtapi_init_hook();
+// extern rtapi_data_t *_rtapi_init_hook();
 
 int _rtapi_init(const char *modname) {
     int n, module_id;
     module_data *module;
+    struct shm_status sm;
+    int retval;
 
     /* say hello */
-    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI:%d initing module %s\n",
+    rtapi_print_msg(RTAPI_MSG_DBG, "ULAPI:%d initing module %s\n", 
 		    rtapi_instance, modname);
-    /* get shared memory block from OS and save its address */
     errno = 0;
 
-    if ((rtapi_data = _rtapi_init_hook()) == NULL)
-	return -ENOMEM;
-
-    /* perform a global init if needed */
+    // if not done yet, attach global and rtapi_data segments now
+    if (global_data == NULL) {
+	sm.key = OS_KEY(GLOBAL_KEY, rtapi_instance);
+	sm.size = sizeof(global_data_t);
+	sm.flags = 0;
+	if ((retval = shmdrv_attach(&sm, (void **)&global_data)) < 0) {
+	    rtapi_print_msg(RTAPI_MSG_ERR,
+			    "ULAPI:%d ERROR: can attach global segment: %d\n",
+			    rtapi_instance, retval);
+	    return -EINVAL;
+	}
+	sm.key = OS_KEY(RTAPI_KEY, rtapi_instance);
+	sm.size = sizeof(rtapi_data_t);
+	sm.flags = 0;
+	if ((retval = shmdrv_attach(&sm, (void **)&rtapi_data)) < 0) {
+	    rtapi_print_msg(RTAPI_MSG_ERR,
+			    "ULAPI:%d ERROR: cant attach rtapi segment: %d\n",
+			    rtapi_instance, retval);
+	    return -EINVAL;
+	}
+    }
+    // I consider this dubious - there is no reason for ULAPI to start without
+    // rtapi_data already being inited: -mah
     init_rtapi_data(rtapi_data);
+
     /* check flavor and serial codes */
     if (rtapi_data->thread_flavor_id != THREAD_FLAVOR_ID) {
 	/* mismatch - release master shared memory block */
 	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: flavor mismatch %d vs %d\n",
-			rtapi_instance,
+			"ULAPI:%d ERROR: flavor mismatch %d vs %d\n",
+			rtapi_instance, 
 			rtapi_data->thread_flavor_id, THREAD_FLAVOR_ID);
 	return -EINVAL;
     }
     if (rtapi_data->serial != RTAPI_SERIAL) {
 	/* mismatch - release master shared memory block */
 	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: serial mismatch %d vs %d\n",
+			"ULAPI:%d ERROR: serial mismatch %d vs %d\n",
 			rtapi_instance, rtapi_data->serial, RTAPI_SERIAL);
 	return -EINVAL;
     }
@@ -363,6 +486,8 @@ int _rtapi_init(const char *modname) {
     module_array = rtapi_data->module_array;
     task_array = rtapi_data->task_array;
     shmem_array = rtapi_data->shmem_array;
+    ring_array = rtapi_data->ring_array;
+
     /* perform local init */
     for (n = 0; n <= RTAPI_MAX_SHMEMS; n++) {
 	shmem_addr_array[n] = NULL;
@@ -379,7 +504,7 @@ int _rtapi_init(const char *modname) {
 	/* no room */
 	rtapi_mutex_give(&(rtapi_data->mutex));
 	rtapi_print_msg(RTAPI_MSG_ERR,
-			"RTAPI:%d ERROR: reached module limit %d\n",
+			"ULAPI:%d ERROR: reached module limit %d\n", 
 			rtapi_instance,n);
 	return -EMFILE;
     }
@@ -397,7 +522,7 @@ int _rtapi_init(const char *modname) {
     }
     rtapi_data->ul_module_count++;
     rtapi_mutex_give(&(rtapi_data->mutex));
-    rtapi_print_msg(RTAPI_MSG_DBG, "RTAPI:%d module '%s' inited, ID = %02d\n",
+    rtapi_print_msg(RTAPI_MSG_DBG, "ULAPI:%d module '%s' inited, ID = %02d\n",
 		    rtapi_instance,module->name, module_id);
     return module_id;
 }

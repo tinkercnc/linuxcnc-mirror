@@ -12,7 +12,6 @@
 #define RTAPI_NAME_LEN XNOBJECT_NAME_LEN
 */
 
-#define MASTER_HEAP "rtapi-heap"
 /* rtapi_common.c */
 // Init rt_stats for RTAPI
 #define HAVE_INIT_RTAPI_DATA_HOOK

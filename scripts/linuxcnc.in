@@ -509,8 +509,8 @@ function Cleanup() {
 
 function LinuxcncRunning() {
     # 135612177 is the integer ID of the GLOBAL data segment:
-    # (GLOBAL_KEY 0x08154711). it is universally present for
-    # all thread styles build options, and removed by
+    # (GLOBAL_KEY 0x08154711). it is universally present for 
+    # all thread styles build options, and removed by 
     # RTAPI rtapi_app_exit(). Hence it is a more reliable
     # indication for 'RTAPI running' than a lock file.
     grep 135612177  /proc/sysvipc/shm >/dev/null 2>&1
