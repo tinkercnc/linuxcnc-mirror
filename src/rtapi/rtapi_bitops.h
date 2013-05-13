@@ -1,5 +1,66 @@
 #ifndef RTAPI_BITOPS_H
 #define RTAPI_BITOPS_H
+
+#include "config.h"  // for USE_GCC_ATOMIC_OPS
+
+#ifndef _BIT                     // /usr/include/pth.h might bring this in too
+#define _BIT(nr)                 (1UL << (nr))
+#endif
+
+// http://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Atomic-Builtins.html
+// http://www.mjmwired.net/kernel/Documentation/atomic_ops.txt
+
+/*
+ * clear_bit may not imply a memory barrier
+ * http://www.mjmwired.net/kernel/Documentation/atomic_ops.txt#490
+ */
+#ifndef smp_mb__before_clear_bit
+#define smp_mb__before_clear_bit()      __sync_synchronize()
+#define smp_mb__after_clear_bit()       __sync_synchronize()
+#endif
+
+#if defined(USE_GCC_ATOMIC_OPS)
+#define test_and_set_bit(nr, value)    __sync_fetch_and_or(value, _BIT(nr))
+#define test_and_clear_bit(nr, value)  __sync_fetch_and_and(value, ~_BIT(nr))
+
+#define set_bit(nr, value)             __sync_or_and_fetch(value, _BIT(nr))
+#define clear_bit(nr, value)           __sync_and_and_fetch(value, ~_BIT(nr))
+
+#ifndef test_bit
+/*
+ * This routine doesn't need to be atomic.
+ * constant bit tests are the most common (if only) use case in LinuxCNC
+ */
+static __inline__ int __constant_test_bit(int nr, const volatile void *addr)
+{
+	return ((1UL << (nr & 31)) &
+		(((const volatile unsigned int *)addr)[nr >> 5])) != 0;
+}
+
+static __inline__ int __test_bit(int nr, volatile void *addr)
+{
+	int *a = (int *)addr;
+	int mask;
+	a += nr >> 5;
+	mask = 1 << (nr & 0x1f);
+	return ((mask & *a) != 0);
+}
+
+#define	test_bit(nr,addr) \
+    (__builtin_constant_p(nr) ?	    \
+     __constant_test_bit((nr),(addr)) :		\
+     __test_bit((nr),(addr)))
+
+#endif // test_bit
+
+// alternative implementation with sync fetch:
+/* #ifndef test_bit */
+/* #define test_bit(nr, value)           (_BIT(nr) & __sync_fetch_and_or(value, 0)) */
+/* #endif */
+
+
+#else
+
 #if (defined(__MODULE__) && !defined(SIM))
 #include <asm/bitops.h>
 #elif defined(__i386__)
@@ -281,4 +342,5 @@ static __inline__ int test_and_clear_bit(unsigned long nr,
 #else
 #error The header file <asm/bitops.h> is not usable and rtapi does not yet have support for your CPU
 #endif
+#endif // USE_GCC_ATOMIC_OPS
 #endif
