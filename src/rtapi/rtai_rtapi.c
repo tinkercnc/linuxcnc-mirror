@@ -439,11 +439,11 @@ int rtapi_snprintf(char *buf, unsigned long int size, const char *fmt, ...)
     return i;
 }
 
-#define BUFFERLEN 1024
+#define MSG_BUFFERLEN 1024
 
 void default_rtapi_msg_handler(msg_level_t level, const char *fmt, va_list ap) {
-    char buf[BUFFERLEN];
-    rtapi_vsnprintf(buf, BUFFERLEN, fmt, ap);
+    char buf[MSG_BUFFERLEN];
+    rtapi_vsnprintf(buf, MSG_BUFFERLEN, fmt, ap);
     rt_printk(buf);
 }
 static rtapi_msg_handler_t rtapi_msg_handler = default_rtapi_msg_handler;

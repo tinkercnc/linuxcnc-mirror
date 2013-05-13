@@ -239,16 +239,16 @@ int rtapi_snprintf(char *buf, unsigned long int size, const char *fmt, ...)
     return i;
 }
 
-#define BUFFERLEN 1024
+#define MSG_BUFFERLEN 1024
 
 void rtapi_print(const char *fmt, ...)
 {
-    char buffer[BUFFERLEN + 1];
+    char buffer[MSG_BUFFERLEN + 1];
     va_list args;
 
     va_start(args, fmt);
     /* call the normal library vnsprintf() */
-    vsnprintf(buffer, BUFFERLEN, fmt, args);
+    vsnprintf(buffer, MSG_BUFFERLEN, fmt, args);
     fputs(buffer, stdout);
     va_end(args);
 }
