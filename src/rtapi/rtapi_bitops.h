@@ -3,14 +3,34 @@
 
 #include "config.h"  // for USE_GCC_ATOMIC_OPS
 
+// the Linux kernel has very nice bitmap handling
+// unfortunately it is not available through /usr/include
+// therefore replicate from linux/bitops.h and linux/kernel.h
+// and prefix with an '_' to roll our own
+
+typedef unsigned long long_bit;
+
+#define _DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #ifndef _BIT                     // /usr/include/pth.h might bring this in too
 #define _BIT(nr)                 (1UL << (nr))
 #endif
+#define _BITS_PER_BYTE           8
+#define _BITS_PER_LONG           (_BITS_PER_BYTE * sizeof(long_bit))
+#define _BIT_MASK(nr)            (1UL << ((nr) % _BITS_PER_LONG))
+#define _BIT_WORD(nr)            ((nr) / _BITS_PER_LONG)
+#define _BITS_TO_LONGS(nr)       _DIV_ROUND_UP(nr, _BITS_PER_LONG)
+#define _BIT_SET(a, b)           ((a)[_BIT_WORD(b)] |=   _BIT_MASK(b))
+#define _BIT_CLEAR(a, b)         ((a)[_BIT_WORD(b)] &= ~ _BIT_MASK(b))
+#define _BIT_TEST(a, b)          ((a)[_BIT_WORD(b)] &    _BIT_MASK(b))
 
-// http://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Atomic-Builtins.html
-// http://www.mjmwired.net/kernel/Documentation/atomic_ops.txt
+#define _DECLARE_BITMAP(name,bits) long_bit name[_BITS_TO_LONGS(bits)]
+#define _ZERO_BITMAP(name,bits)  { memset(name, 0,   _BITS_TO_LONGS(bits) * sizeof(long_bit)); }
+#define _SET_BITMAP(name,bits)   { memset(name, 255, _BITS_TO_LONGS(bits) * sizeof(long_bit)); }
 
 /*
+ * http://gcc.gnu.org/onlinedocs/gcc-4.7.3/gcc/_005f_005fatomic-Builtins.html#g_t_005f_005fatomic-Builtins
+ * http://www.mjmwired.net/kernel/Documentation/atomic_ops.txt
+ *
  * clear_bit may not imply a memory barrier
  * http://www.mjmwired.net/kernel/Documentation/atomic_ops.txt#490
  */
@@ -20,22 +40,98 @@
 #endif
 
 #if defined(USE_GCC_ATOMIC_OPS)
-#define test_and_set_bit(nr, value)    __sync_fetch_and_or(value, _BIT(nr))
-#define test_and_clear_bit(nr, value)  __sync_fetch_and_and(value, ~_BIT(nr))
 
-#define set_bit(nr, value)             __sync_or_and_fetch(value, _BIT(nr))
-#define clear_bit(nr, value)           __sync_and_and_fetch(value, ~_BIT(nr))
+// http://gcc.gnu.org/wiki/Atomic/GCCMM/AtomicSync
+// default: Full barrier in both directions and synchronizes with
+// acquire loads and release stores in all threads.
+#define _GCCMM_ __ATOMIC_SEQ_CST
 
+#if __clang__
+#define USE_ATOMIC __has_builtin(__atomic_fetch_or)
+# elif (__GNUC__ > 4) && (__GNUC_MINOR__ >= 7)
+#define USE_ATOMIC 1
+#else
+#define USE_ATOMIC 0
+#endif
+
+#if USE_ATOMIC
+
+// http://gcc.gnu.org/wiki/Atomic/GCCMM/AtomicSync
+// default: Full barrier in both directions and synchronizes with
+// acquire loads and release stores in all threads.
+#define MEMORY_MODEL __ATOMIC_SEQ_CST
+
+static inline long_bit test_and_set_bit(int nr, long_bit * const value) {
+    return  __atomic_fetch_or(value + _BIT_WORD(nr),
+			      _BIT(nr),MEMORY_MODEL) & _BIT(nr);
+}
+
+static inline long_bit test_and_clear_bit(int nr, long_bit * const value) {
+    return __atomic_fetch_and(value + _BIT_WORD(nr),
+			      ~_BIT(nr),
+			      MEMORY_MODEL) & _BIT(nr);
+}
+
+static inline void set_bit(int nr, long_bit * const value) {
+    __atomic_or_fetch(value + _BIT_WORD(nr),
+		      _BIT(nr),
+		      MEMORY_MODEL);
+}
+
+static inline void clear_bit(int nr, long_bit * const value) {
+    __atomic_and_fetch(value + _BIT_WORD(nr),
+		       ~_BIT(nr),
+		       MEMORY_MODEL);
+}
+
+#ifdef USE_ATOMIC_TEST_BIT
+static inline long_bit test_bit(int nr, long_bit * const value) {
+    return  __atomic_fetch_or(value + _BIT_WORD(nr), 0) & _BIT(nr);
+}
+#endif
+
+#else  // legacy gcc intrinsics
+static inline long_bit test_and_set_bit(int nr, long_bit * const value) {
+    return  __sync_fetch_and_or(value + _BIT_WORD(nr),
+				_BIT(nr)) & _BIT(nr);
+}
+
+static inline long_bit test_and_clear_bit(int nr, long_bit * const value) {
+    return __sync_fetch_and_and(value + _BIT_WORD(nr),
+			      ~_BIT(nr)) & _BIT(nr);
+}
+
+static inline void set_bit(int nr, long_bit * const value) {
+    __sync_or_and_fetch(value + _BIT_WORD(nr), _BIT(nr));
+}
+
+static inline void clear_bit(int nr, long_bit * const value) {
+    __sync_and_and_fetch(value + _BIT_WORD(nr), ~_BIT(nr));
+}
+
+#ifdef USE_ATOMIC_TEST_BIT
+static inline long_bit test_bit(int nr, long_bit * const value) {
+    return  __sync_fetch_and_or(value + _BIT_WORD(nr), 0) & _BIT(nr);
+}
+#endif
+#endif
+
+#ifndef USE_ATOMIC_TEST_BIT
 #ifndef test_bit
-/*
+
+/**
+ * test_bit - Determine whether a bit is set
+ * @nr: bit number to test
+ * @addr: Address to start counting from
+ *
  * This routine doesn't need to be atomic.
  * constant bit tests are the most common (if only) use case in LinuxCNC
  */
-static __inline__ int __constant_test_bit(int nr, const volatile void *addr)
+static  __inline__ int __constant_test_bit(int nr, const volatile unsigned long *addr)
 {
-	return ((1UL << (nr & 31)) &
-		(((const volatile unsigned int *)addr)[nr >> 5])) != 0;
+        return 1UL & (addr[_BIT_WORD(nr)] >> (nr & (_BITS_PER_LONG-1)));
 }
+
 
 static __inline__ int __test_bit(int nr, volatile void *addr)
 {
@@ -52,12 +148,7 @@ static __inline__ int __test_bit(int nr, volatile void *addr)
      __test_bit((nr),(addr)))
 
 #endif // test_bit
-
-// alternative implementation with sync fetch:
-/* #ifndef test_bit */
-/* #define test_bit(nr, value)           (_BIT(nr) & __sync_fetch_and_or(value, 0)) */
-/* #endif */
-
+#endif // USE_ATOMIC_TEST_BIT
 
 #else
 
