@@ -14,10 +14,15 @@
 
 #if defined(__clang__) && __clang__
 #define RTAPI_USE_ATOMIC 1
-#warning "clang"
+
+// the __ATOMIC_* memory model macros will become available with C11 / C++11 only
+// see http://clang.llvm.org/doxygen/InitPreprocessor_8cpp_source.html
+#ifndef __ATOMIC_SEQ_CST
+#define __ATOMIC_SEQ_CST 5
+#endif
+
 #elif defined(__GNUC__) && (__GNUC__ > 4) && (__GNUC_MINOR__ >= 7)
 #define RTAPI_USE_ATOMIC 1
-#warning "gcc47"
 #else
 #define RTAPI_USE_ATOMIC 0
 #endif
