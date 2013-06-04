@@ -3,6 +3,7 @@
 
 #include <limits.h>  // CHAR_BIT
 
+
 // determine which flavor of atomic ops to use:
 // the __sync_* legacy ops in gcc (<4.7) or the
 // __atomic_* operations in gcc 4.7 and onwards, and llvm
