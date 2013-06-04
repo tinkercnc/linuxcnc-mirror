@@ -3,6 +3,7 @@
 
 #include "config.h"  // for USE_GCC_ATOMIC_OPS
 
+
 // the Linux kernel has very nice bitmap handling
 // unfortunately it is not available through /usr/include
 // therefore replicate from linux/bitops.h and linux/kernel.h
@@ -40,13 +41,14 @@ typedef unsigned long long_bit;
 #endif
 
 #if defined(USE_GCC_ATOMIC_OPS)
+#if !defined(__MODULE__)
 
 // http://gcc.gnu.org/wiki/Atomic/GCCMM/AtomicSync
 // default: Full barrier in both directions and synchronizes with
 // acquire loads and release stores in all threads.
 #define _GCCMM_ __ATOMIC_SEQ_CST
 
-#if __clang__
+#ifdef __clang__
 #define USE_ATOMIC __has_builtin(__atomic_fetch_or)
 # elif (__GNUC__ > 4) && (__GNUC_MINOR__ >= 7)
 #define USE_ATOMIC 1
@@ -148,6 +150,7 @@ static __inline__ int __test_bit(int nr, volatile void *addr)
      __test_bit((nr),(addr)))
 
 #endif // test_bit
+#endif // !__MODULE__
 #endif // USE_ATOMIC_TEST_BIT
 
 #else
