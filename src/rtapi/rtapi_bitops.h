@@ -1,9 +1,6 @@
 #ifndef RTAPI_BITOPS_H
 #define RTAPI_BITOPS_H
 
-#include <limits.h>  // CHAR_BIT
-
-
 // determine which flavor of atomic ops to use:
 // the __sync_* legacy ops in gcc (<4.7) or the
 // __atomic_* operations in gcc 4.7 and onwards, and llvm
@@ -33,9 +30,11 @@
 // and prefix with an 'RTAPI_' to roll our own
 
 typedef unsigned long rtapi_atomic_type;
+
+#define RTAPI_CHAR_BIT 8
 #define RTAPI_DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #define RTAPI_BIT(nr)           (1UL << (nr))
-#define RTAPI_BITS_PER_LONG     (CHAR_BIT * sizeof(rtapi_atomic_type))
+#define RTAPI_BITS_PER_LONG     (RTAPI_CHAR_BIT * sizeof(rtapi_atomic_type))
 #define RTAPI_BIT_MASK(nr)      (1UL << ((nr) % RTAPI_BITS_PER_LONG))
 #define RTAPI_BIT_WORD(nr)      ((nr) / RTAPI_BITS_PER_LONG)
 #define RTAPI_BITMAP_SIZE(nr)   RTAPI_DIV_ROUND_UP(nr, RTAPI_BITS_PER_LONG)
