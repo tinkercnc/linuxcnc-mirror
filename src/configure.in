@@ -1599,10 +1599,6 @@ AC_SUBST([BUILD_PYTHON])
 AC_SUBST([LIBPYTHON])
 AC_SUBST([INCLUDEPY])
 AC_SUBST([SITEPY])
-if test "$USE_GCC_ATOMIC_OPS" = yes; then
-   AC_DEFINE(USE_GCC_ATOMIC_OPS, [], [use GCC builtin atomic operations])
-fi
-AC_SUBST(USE_GCC_ATOMIC_OPS)
 
 ##############################################################################
 # files that get created by ./configure                                      #
