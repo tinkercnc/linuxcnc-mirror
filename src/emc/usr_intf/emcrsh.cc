@@ -43,6 +43,8 @@
 #include "timer.hh"             // etime()
 #include "shcom.hh"             // NML Messaging functions
 
+#define DEBUG(args...) fprintf(stderr, "linuxcncrsh: " args)
+
 /*
   Using emcrsh:
 
@@ -2672,9 +2674,11 @@ void *readClient(void *arg)
       goto finished;
     }
     if (len == 0) {
-      printf("linuxcncrsh: eof from client\n");
+      fprintf(stderr, "linuxcncrsh: eof from client\n");
       goto finished;
     }
+
+    DEBUG("read %d bytes from client on socket %d\n", len, context->cliSock);
 
     if (context->echo && context->linked)
       if(write(context->cliSock, buf, len) != (ssize_t)len) {
@@ -2694,6 +2698,7 @@ void *readClient(void *arg)
             int r;
             // we have some bytes in the context buffer, parse them now
             context->inBuf[context_index] = '\0';
+            DEBUG("got a command from client on %d: '%s'\n", context->cliSock, context->inBuf);
             r = parseCommand(context);
             if (r == -1) goto finished;
             context_index = 0;
@@ -2719,12 +2724,17 @@ int sockMain()
       client_len = sizeof(client_address);
       client_sockfd = accept(server_sockfd,
         (struct sockaddr *)&client_address, &client_len);
-      if (client_sockfd < 0) exit(0);
+      if (client_sockfd < 0) {
+          DEBUG("failed to accept: %s\n", strerror(errno));
+          exit(0);
+      }
+      DEBUG("accepted a connection from a new client\n");
       sessions++;
       if ((maxSessions == -1) || (sessions <= maxSessions))
         res = pthread_create(&thrd, NULL, readClient, (void *)NULL);
       else res = -1;
       if (res != 0) {
+        DEBUG("too many clients or failed to create client thread\n");
         close(client_sockfd);
         sessions--;
         }
