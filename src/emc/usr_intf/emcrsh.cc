@@ -556,7 +556,16 @@ static int initSockets()
   server_len = sizeof(server_address);
   bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
   listen(server_sockfd, 5);
-  signal(SIGCHLD, SIG_IGN);
+
+  // ignore SIGCHLD
+  {
+    struct sigaction act;
+    act.sa_handler = SIG_IGN;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGCHLD, &act, NULL);
+  }
+
   return 0;
 }
 
@@ -2658,8 +2667,6 @@ void *readClient(void *arg)
   int len;
   connectionRecType *context;
 
-  signal(SIGPIPE, SIG_IGN);
-
   context = (connectionRecType *) malloc(sizeof(connectionRecType));
   context->cliSock = client_sockfd;
   context->linked = false;
@@ -2819,7 +2826,22 @@ int main(int argc, char *argv[])
     saveEmcCommandSerialNumber = emcStatus->echo_serial_number;
 
     // attach our quit function to SIGINT
-    signal(SIGINT, sigQuit);
+    {
+        struct sigaction act;
+        act.sa_handler = sigQuit;
+        sigemptyset(&act.sa_mask);
+        act.sa_flags = 0;
+        sigaction(SIGINT, &act, NULL);
+    }
+
+    // make all threads ignore SIGPIPE
+    {
+        struct sigaction act;
+        act.sa_handler = SIG_IGN;
+        sigemptyset(&act.sa_mask);
+        act.sa_flags = 0;
+        sigaction(SIGPIPE, &act, NULL);
+    }
 
     if (useSockets) sockMain();
 
