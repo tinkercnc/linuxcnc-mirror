@@ -1,3 +1,6 @@
 #!/bin/sh
 
-strace -ff -o /tmp/strace.linuxcnc linuxcncrsh
+echo INI_FILE_NAME is $INI_FILE_NAME
+echo my pid is $$
+
+strace -s 1024 -ff -o /tmp/strace.linuxcnc linuxcncrsh
