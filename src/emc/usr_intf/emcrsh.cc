@@ -2715,6 +2715,8 @@ void *readClient(void *arg)
             context_index = 0;
         }
     }
+    context->inBuf[context_index] = (char)0;
+    DEBUG("parsed all input, remaining string is '%s'\n", context->inBuf);
   }
 
 finished:
