@@ -2712,7 +2712,9 @@ void *readClient(void *arg)
             context->inBuf[context_index] = '\0';
             DEBUG("got a command from client on %d: '%s'\n", context->cliSock, context->inBuf);
             r = parseCommand(context);
-            if (r == -1) goto finished;
+            // ignore all errors
+            // it'd be better to ignore just errors from write() probably
+            // if (r == -1) goto finished;  FIXME bug is here
             context_index = 0;
         }
     }
