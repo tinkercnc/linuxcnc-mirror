@@ -2667,19 +2667,7 @@ void *readClient(void *arg)
   int context_index;
   int i;
   int len;
-  connectionRecType *context;
-
-  context = (connectionRecType *) malloc(sizeof(connectionRecType));
-  context->cliSock = client_sockfd;
-  context->linked = false;
-  context->echo = true;
-  context->verbose = false;
-  strcpy(context->version, "1.0");
-  strcpy(context->hostName, "Default");
-  context->enabled = false;
-  context->commMode = 0;
-  context->commProt = 0;
-  context->inBuf[0] = 0;
+  connectionRecType *context = (connectionRecType *)arg;
 
   context_index = 0;
 
@@ -2736,7 +2724,6 @@ finished:
 
 int sockMain()
 {
-    pthread_t thrd;
     int res;
     
     while (1) {
@@ -2750,9 +2737,37 @@ int sockMain()
       }
       DEBUG("accepted a connection from a new client\n");
       sessions++;
-      if ((maxSessions == -1) || (sessions <= maxSessions))
-        res = pthread_create(&thrd, NULL, readClient, (void *)NULL);
-      else res = -1;
+      if ((maxSessions == -1) || (sessions <= maxSessions)) {
+        pthread_t *thrd;
+        connectionRecType *context;
+
+        thrd = (pthread_t *)calloc(1, sizeof(pthread_t));
+        if (thrd == NULL) {
+          fprintf(stderr, "linuxcncrsh: out of memory\n");
+          exit(1);
+        }
+
+        context = (connectionRecType *) malloc(sizeof(connectionRecType));
+        if (context == NULL) {
+          fprintf(stderr, "linuxcncrsh: out of memory\n");
+          exit(1);
+        }
+
+        context->cliSock = client_sockfd;
+        context->linked = false;
+        context->echo = true;
+        context->verbose = false;
+        strcpy(context->version, "1.0");
+        strcpy(context->hostName, "Default");
+        context->enabled = false;
+        context->commMode = 0;
+        context->commProt = 0;
+        context->inBuf[0] = 0;
+
+        res = pthread_create(thrd, NULL, readClient, (void *)context);
+      } else {
+        res = -1;
+      }
       if (res != 0) {
         DEBUG("too many clients or failed to create client thread\n");
         close(client_sockfd);
