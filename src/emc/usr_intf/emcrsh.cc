@@ -558,16 +558,6 @@ static int initSockets()
   server_len = sizeof(server_address);
   bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
   listen(server_sockfd, 5);
-
-  // ignore SIGCHLD
-  {
-    struct sigaction act;
-    act.sa_handler = SIG_IGN;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
-    sigaction(SIGCHLD, &act, NULL);
-  }
-
   return 0;
 }
 
