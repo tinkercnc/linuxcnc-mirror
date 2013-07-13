@@ -2701,7 +2701,9 @@ void *readClient(void *arg)
             // we have some bytes in the context buffer, parse them now
             context->inBuf[context_index] = '\0';
             r = parseCommand(context);
-            if (r == -1) goto finished;
+            // ignore all errors
+            // it'd be better to ignore just errors from write() probably
+            // if (r == -1) goto finished;  FIXME bug is here
             context_index = 0;
         }
     }
