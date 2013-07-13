@@ -2659,6 +2659,22 @@ void *readClient(void *arg)
   int len;
   connectionRecType *context = (connectionRecType *)arg;
 
+  {
+    struct sigaction sa;
+
+    DEBUG("starting readClient\n");
+
+    sigaction(SIGPIPE, NULL, &sa);
+    if (sa.sa_handler == SIG_IGN) {
+      DEBUG("    SIGPIPE handler is SIG_IGN\n");
+    } else if (sa.sa_handler == SIG_DFL) {
+      DEBUG("    SIGPIPE handler is SIG_DFL\n");
+    } else {
+      DEBUG("    SIGPIPE handler is %p\n", sa.sa_handler);
+    }
+
+  }
+
   context_index = 0;
 
   while (1) {
