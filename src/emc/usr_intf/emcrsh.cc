@@ -461,7 +461,7 @@ typedef struct {
   char progName[PATH_MAX];} connectionRecType;
 
 int port = 5007;
-int server_sockfd, client_sockfd;
+int server_sockfd;
 socklen_t server_len, client_len;
 struct sockaddr_in server_address;
 struct sockaddr_in client_address;
@@ -2727,7 +2727,8 @@ int sockMain()
     int res;
     
     while (1) {
-      
+      int client_sockfd;
+
       client_len = sizeof(client_address);
       client_sockfd = accept(server_sockfd,
         (struct sockaddr *)&client_address, &client_len);
