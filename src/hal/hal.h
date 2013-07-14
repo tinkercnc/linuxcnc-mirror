@@ -415,6 +415,7 @@ extern int hal_rtapi_detach();
     or parameter.
 */
 typedef enum {
+    HAL_TYPE_UNSPECIFIED = -1,
     HAL_BIT = 1,
     HAL_FLOAT = 2,
     HAL_S32 = 3,
@@ -430,6 +431,7 @@ typedef enum {
 */
 
 typedef enum {
+    HAL_DIR_UNSPECIFIED = -1,
     HAL_IN = 16,
     HAL_OUT = 32,
     HAL_IO = (HAL_IN | HAL_OUT),
@@ -450,7 +452,12 @@ typedef enum {
    individual bytes in a machine word. */
 #define __KERNEL_STRICT_NAMES
 #include <linux/types.h>
-typedef volatile unsigned char hal_bit_t;
+#ifdef __cplusplus
+typedef bool hal_bool;
+#else
+typedef _Bool hal_bool;
+#endif
+typedef volatile hal_bool hal_bit_t;
 typedef volatile __u32 hal_u32_t;
 typedef volatile __s32 hal_s32_t;
 typedef double real_t __attribute__((aligned(8)));

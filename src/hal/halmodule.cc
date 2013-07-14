@@ -263,6 +263,7 @@ static PyObject *pyhal_read_common(halitem *item) {
             case HAL_U32: return PyLong_FromUnsignedLong(*(item->u->pin.u32));
             case HAL_S32: return PyInt_FromLong(*(item->u->pin.s32));
             case HAL_FLOAT: return PyFloat_FromDouble(*(item->u->pin.f));
+            case HAL_TYPE_UNSPECIFIED: /* fallthrough */ ;
         }
     } else {
         switch(item->type) {
@@ -270,6 +271,7 @@ static PyObject *pyhal_read_common(halitem *item) {
             case HAL_U32: return PyLong_FromUnsignedLong(item->u->param.u32);
             case HAL_S32: return PyInt_FromLong(item->u->param.s32);
             case HAL_FLOAT: return PyFloat_FromDouble(item->u->param.f);
+            case HAL_TYPE_UNSPECIFIED: /* fallthrough */ ;
         }
     }
     PyErr_Format(pyhal_error_type, "Invalid item type %d", item->type);
@@ -767,7 +769,7 @@ PyObject *new_sig(PyObject *self, PyObject *args) {
 		"not a valid HAL signal type");
 	return NULL;}
     }
-    return PyBool_FromLong( retval!= NULL);
+    return PyBool_FromLong(retval != 0);
 }
 
 PyObject *connect(PyObject *self, PyObject *args) {
@@ -779,7 +781,7 @@ PyObject *connect(PyObject *self, PyObject *args) {
 	return NULL;
     }
     //printf("INFO HALMODULE -- link sig %s to pin %s\n",signame,pinname);
-    return PyBool_FromLong( hal_link(pinname, signame)!= NULL);
+    return PyBool_FromLong(hal_link(pinname, signame) != 0);
 }
 
 static int set_common(hal_type_t type, void *d_ptr, char *value) {
@@ -901,7 +903,7 @@ PyObject *set_p(PyObject *self, PyObject *args) {
     }
     retval = set_common(type, d_ptr, value);
     rtapi_mutex_give(&(hal_data->mutex));   
-    return PyBool_FromLong( retval!= NULL);
+    return PyBool_FromLong(retval != 0);
 }
 
 struct shmobject {

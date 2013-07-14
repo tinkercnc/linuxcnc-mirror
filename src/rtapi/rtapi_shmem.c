@@ -245,7 +245,7 @@ int _rtapi_shmem_new_inst(int key, int instance, int module_id, unsigned long in
 		return -EINVAL;
 	    }
 	    /* is this module already using it? */
-	    if (test_bit(module_id, shmem->bitmap)) {
+	    if (rtapi_test_bit(module_id, shmem->bitmap)) {
 		rtapi_mutex_give(&(rtapi_data->mutex));
 		rtapi_print_msg(RTAPI_MSG_WARN,
 				"RTAPI: Warning: shmem already mapped\n");
@@ -282,7 +282,7 @@ int _rtapi_shmem_new_inst(int key, int instance, int module_id, unsigned long in
 	    }
 #endif
 	    /* update usage data */
-	    set_bit(module_id, shmem->bitmap);
+	    rtapi_set_bit(module_id, shmem->bitmap);
 #ifdef ULAPI
 	    shmem->ulusers++;
 #else  /* RTAPI */
@@ -341,7 +341,7 @@ int _rtapi_shmem_new_inst(int key, int instance, int module_id, unsigned long in
 	return -ENOMEM;
     }
     /* the block has been created, update data */
-    set_bit(module_id, shmem->bitmap);
+    rtapi_set_bit(module_id, shmem->bitmap);
     shmem->key = key;
 #ifdef RTAPI
     shmem->rtusers = 1;
@@ -415,7 +415,7 @@ int _rtapi_shmem_delete_inst(int shmem_id, int instance, int module_id) {
 	return -EINVAL;
     }
     /* is this module using the block? */
-    if (test_bit(module_id, shmem->bitmap) == 0) {
+    if (rtapi_test_bit(module_id, shmem->bitmap) == 0) {
 	return -EINVAL;
     }
     /* check if we need to manage the mutex */
@@ -423,7 +423,7 @@ int _rtapi_shmem_delete_inst(int shmem_id, int instance, int module_id) {
     /* if no magic delete lock held is set, get the mutex */
     if (manage_lock) rtapi_mutex_get(&(rtapi_data->mutex));
     /* OK, we're no longer using it */
-    clear_bit(module_id, shmem->bitmap);
+    rtapi_clear_bit(module_id, shmem->bitmap);
 #ifdef ULAPI
     shmem->ulusers--;
 

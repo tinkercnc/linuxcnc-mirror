@@ -249,7 +249,7 @@ static int do_load_cmd(string name, vector<string> args) {
     void *module;
 
     if(w == NULL) {
-	strncpy(module_name, (name + flavor->mod_ext).c_str(), PATH_MAX);
+		strncpy(module_name, (name + flavor->mod_ext).c_str(), PATH_MAX);
 
         module = modules[name] = dlopen(module_name, RTLD_GLOBAL |RTLD_NOW);
         if(!module) {

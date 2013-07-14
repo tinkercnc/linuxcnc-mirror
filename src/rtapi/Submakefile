@@ -140,7 +140,6 @@ $(call TOOBJSDEPS, rtapi/$(threads)/sim_rtapi_app.cc): EXTRAFLAGS = \
 
 modules:  ../libexec/rtapi_app_$(threads)
 endif # BUILD_SYS == user-dso
-
 ##################################################################
 #                     KERNEL THREAD STYLES
 ##################################################################

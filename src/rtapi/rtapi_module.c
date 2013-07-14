@@ -368,7 +368,7 @@ static int module_delete(int module_id) {
 	}
     }
     for (n = 1; n <= RTAPI_MAX_SHMEMS; n++) {
-	if (test_bit(module_id, shmem_array[n].bitmap)) {
+	if (rtapi_test_bit(module_id, shmem_array[n].bitmap)) {
 	    rtapi_print_msg(RTAPI_MSG_WARN,
 			    "RTAPI:%d WARNING: module '%s' failed to delete shmem %02d\n",
 			    rtapi_instance, module->name, n);
@@ -532,7 +532,7 @@ int _rtapi_exit(int module_id) {
     }
     /* clean up any mess left behind by the module */
     for (n = 1; n <= RTAPI_MAX_SHMEMS; n++) {
-	if (test_bit(module_id, shmem_array[n].bitmap)) {
+	if (rtapi_test_bit(module_id, shmem_array[n].bitmap)) {
 	    rtapi_print_msg(RTAPI_MSG_WARN,
 			    "ULAPI:%d WARNING: module '%s' failed to delete "
 			    "shmem %02d\n", rtapi_instance,module->name, n);

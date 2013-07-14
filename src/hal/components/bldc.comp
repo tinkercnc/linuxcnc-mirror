@@ -378,7 +378,6 @@ author "Andy Pugh";
 function _;
 
 option extra_setup yes;
-option userinit yes;
 option count_function yes;
 
 variable int old_init = 0;
@@ -519,7 +518,7 @@ FUNCTION(_) {
 
             trap = 1;
 
-            if (pattern > 47 || pattern < 0){
+            if (pattern > 47){
                 rtapi_print_msg(RTAPI_MSG_ERR,
                                 "Only `Hall patterns 0-47 are allowed, you have"
                                 " requested pattern %i\n", pattern);

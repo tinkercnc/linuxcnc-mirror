@@ -25,10 +25,16 @@ think of a better way.
 
 void error(int argc, char **argv) {
     int i;
+    int res;
     char *prog = argv[0];
 
     /* drop root privs permanently */
-    setuid(getuid());
+    res = setuid(getuid());
+    if(res != 0)
+    {
+        perror("setuid");
+        exit(1);
+    }
 
     fprintf(stderr, "%s: Invalid usage with args:", argv[0]);
     for(i=1; i<argc; i++) {
@@ -48,6 +54,7 @@ int main(int argc, char **argv) {
     char *mod;
     int i;
     int inserting = 0;
+    int res;
     char **exec_argv;
     char modpath[PATH_MAX];
 
@@ -56,7 +63,12 @@ int main(int argc, char **argv) {
         return 1;
     }
     /* drop root privs temporarily */
-    seteuid(getuid());
+    res = seteuid(getuid());
+    if(res != 0)
+    {
+        perror("seteuid");
+        return 1;
+    }
 
     if(argc < 3) error(argc, argv);
     if(strcmp(argv[1], "insert") && strcmp(argv[1], "remove")) error(argc, argv);
@@ -90,7 +102,13 @@ int main(int argc, char **argv) {
     }
 
     /* reinstate root privs */
-    seteuid(0);
+    res = seteuid(0);
+    if(res != 0)
+    {
+        perror("seteuid");
+        return 1;
+    }
+
     execve(exec_argv[0], exec_argv, NULL);
 
     perror("execv failed");
