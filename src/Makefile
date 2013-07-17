@@ -171,7 +171,7 @@ INCLUDE += -I$(INCLUDEPY)
 endif
 
 # Compilation options.	Perhaps some of these should come from Makefile.inc?
-OPT := -Os
+OPT := -O0
 DEBUG := -g -Wall
 CFLAGS := $(INCLUDE) $(OPT) $(DEBUG) -DULAPI $(call cc-option, -Wdeclaration-after-statement) $(BITOPS_DEFINE)
 CXXFLAGS := $(INCLUDE) $(OPT) $(DEBUG) -DULAPI $(BITOPS_DEFINE)
