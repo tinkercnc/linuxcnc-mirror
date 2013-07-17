@@ -23,5 +23,5 @@ USERSRCS += $(MILLTASKSRCS)
 
 ../bin/milltask: $(call TOOBJS, $(MILLTASKSRCS)) ../lib/librs274.so.0 ../lib/liblinuxcnc.a ../lib/libnml.so.0 ../lib/liblinuxcncini.so.0 ../lib/libposemath.so.0
 	$(ECHO) Linking $(notdir $@)
-	@$(CXX) $(LDFLAGS) -o $@ $^   /usr/realtime-2.6.32-122-rtai/lib/liblxrt.a -lpthread
+	@$(CXX) $(LDFLAGS) -o $@ $^ #  /usr/realtime-2.6.32-122-rtai/lib/liblxrt.a -lpthread
 TARGETS += ../bin/milltask
