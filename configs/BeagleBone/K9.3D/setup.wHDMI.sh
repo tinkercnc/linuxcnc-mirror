@@ -18,7 +18,7 @@ dir_err () {
 SLOTS=/sys/devices/bone_capemgr.*/slots
 
 # Make sure required device tree overlay(s) are loaded
-for DTBO in BB-LCNC-K93D ; do
+for DTBO in BB-LCNC-K9wHDMI ; do
 
 	if grep -q $DTBO $SLOTS ; then
 		echo $DTBO overlay found
@@ -63,25 +63,25 @@ done <<- EOF
 	65	out	# J8.18 gpio2_1 
 	22	out	# J8.19 gpio0_22
 	61	in	# J8.26 gpio1_29
-	86	out	# J8.27 gpio2_22
-	88	in	# J8.28 gpio2_24
-	87	out	# J8.29 gpio2_23
-	89	in	# J8.30 gpio2_25
-	10	in	# J8.31 gpio0_10
-	11	in	# J8.32 gpio0_11
-	9	in	# J8.33 gpio0_9 
-	81	out	# J8.34 gpio2_17
-	9	in	# J8.35 gpio0_8 
-	80	out	# J8.36 gpio2_16
-	78	in	# J8.37 gpio2_14
-	76	out	# J8.39 gpio2_12
-	77	out	# J8.40 gpio2_13
-	74	out	# J8.41 gpio2_10
-	75	out	# J8.42 gpio2_11
-	72	out	# J8.43 gpio2_8 
-	73	out	# J8.44 gpio2_9 
-	70	out	# J8.45 gpio2_6 
-	71	out	# J8.46 gpio2_7 
+#	86	out	# J8.27 gpio2_22
+#	88	in	# J8.28 gpio2_24
+#	87	out	# J8.29 gpio2_23
+#	89	in	# J8.30 gpio2_25
+#	10	in	# J8.31 gpio0_10
+#	11	in	# J8.32 gpio0_11
+#	9	in	# J8.33 gpio0_9 
+#	81	out	# J8.34 gpio2_17
+#	9	in	# J8.35 gpio0_8 
+#	80	out	# J8.36 gpio2_16
+#	78	in	# J8.37 gpio2_14
+#	76	out	# J8.39 gpio2_12
+#	77	out	# J8.40 gpio2_13
+#	74	out	# J8.41 gpio2_10
+#	75	out	# J8.42 gpio2_11
+#	72	out	# J8.43 gpio2_8 
+#	73	out	# J8.44 gpio2_9 
+#	70	out	# J8.45 gpio2_6 
+#	71	out	# J8.46 gpio2_7 
 	
 	30	in	# J9.11 gpio0_30
 	60	in	# J9.12 gpio1_28
