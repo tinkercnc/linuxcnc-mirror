@@ -1,0 +1,464 @@
+|pluto_test_spi
+clk => clk~0.IN5
+SCK => SCKr[0].DATAIN
+MOSI => MOSIr[0].DATAIN
+MISO <= data_sent[7].DB_MAX_OUTPUT_PORT_TYPE
+SSEL => SSEL~0.IN1
+LED <= LED~0.DB_MAX_OUTPUT_PORT_TYPE
+nConfig <= wdt:w.port3
+nPE <= <VCC>
+quadA[0] => quadA[0]~3.IN1
+quadA[1] => quadA[1]~2.IN1
+quadA[2] => quadA[2]~1.IN1
+quadA[3] => quadA[3]~0.IN1
+quadB[0] => quadB[0]~3.IN1
+quadB[1] => quadB[1]~2.IN1
+quadB[2] => quadB[2]~1.IN1
+quadB[3] => quadB[3]~0.IN1
+quadZ[0] => data_buf~15.DATAB
+quadZ[0] => comb~0.IN1
+quadZ[1] => data_buf~14.DATAB
+quadZ[1] => comb~1.IN1
+quadZ[2] => data_buf~13.DATAB
+quadZ[2] => comb~2.IN1
+quadZ[3] => data_buf~12.DATAB
+quadZ[3] => comb~3.IN1
+up[0] <= up[0]~8.DB_MAX_OUTPUT_PORT_TYPE
+up[1] <= up[1]~7.DB_MAX_OUTPUT_PORT_TYPE
+up[2] <= up[2]~6.DB_MAX_OUTPUT_PORT_TYPE
+up[3] <= up[3]~5.DB_MAX_OUTPUT_PORT_TYPE
+down[0] <= down[0]~7.DB_MAX_OUTPUT_PORT_TYPE
+down[1] <= down[1]~6.DB_MAX_OUTPUT_PORT_TYPE
+down[2] <= down[2]~5.DB_MAX_OUTPUT_PORT_TYPE
+down[3] <= down[3]~4.DB_MAX_OUTPUT_PORT_TYPE
+dout[0] <= dout[0]~19.DB_MAX_OUTPUT_PORT_TYPE
+dout[1] <= dout[1]~18.DB_MAX_OUTPUT_PORT_TYPE
+dout[2] <= dout[2]~17.DB_MAX_OUTPUT_PORT_TYPE
+dout[3] <= dout[3]~16.DB_MAX_OUTPUT_PORT_TYPE
+dout[4] <= dout[4]~15.DB_MAX_OUTPUT_PORT_TYPE
+dout[5] <= dout[5]~14.DB_MAX_OUTPUT_PORT_TYPE
+dout[6] <= dout[6]~13.DB_MAX_OUTPUT_PORT_TYPE
+dout[7] <= dout[7]~12.DB_MAX_OUTPUT_PORT_TYPE
+dout[8] <= dout[8]~11.DB_MAX_OUTPUT_PORT_TYPE
+dout[9] <= dout[9]~10.DB_MAX_OUTPUT_PORT_TYPE
+din[0] => data_buf~7.DATAB
+din[1] => data_buf~6.DATAB
+din[2] => data_buf~5.DATAB
+din[3] => data_buf~4.DATAB
+din[4] => data_buf~3.DATAB
+din[5] => data_buf~2.DATAB
+din[6] => data_buf~1.DATAB
+din[7] => data_buf~0.DATAB
+
+
+|pluto_test_spi|OC_Buff:ocout[0]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[1]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[2]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[3]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[4]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[5]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[6]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[7]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[8]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocout[9]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocdown[0]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocdown[1]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocdown[2]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocdown[3]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocup[0]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocup[1]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocup[2]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|OC_Buff:ocup[3]
+in => out~0.OE
+out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|wdt:w
+clk => internal_enable.CLK
+clk => timer[6].CLK
+clk => timer[5].CLK
+clk => timer[4].CLK
+clk => timer[3].CLK
+clk => timer[2].CLK
+clk => timer[1].CLK
+clk => timer[0].CLK
+ena => timer~13.OUTPUTSELECT
+ena => timer~12.OUTPUTSELECT
+ena => timer~11.OUTPUTSELECT
+ena => timer~10.OUTPUTSELECT
+ena => timer~9.OUTPUTSELECT
+ena => timer~8.OUTPUTSELECT
+ena => timer~7.OUTPUTSELECT
+ena => internal_enable.ENA
+cnt => always0~0.IN1
+out <= comb~0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|quad:q0
+clk => Ad[2].CLK
+clk => Ad[1].CLK
+clk => Ad[0].CLK
+clk => Bd[2].CLK
+clk => Bd[1].CLK
+clk => Bd[0].CLK
+clk => Zc[2].CLK
+clk => Zc[1].CLK
+clk => Zc[0].CLK
+clk => last_good.CLK
+clk => c[13].CLK
+clk => c[12].CLK
+clk => c[11].CLK
+clk => c[10].CLK
+clk => c[9].CLK
+clk => c[8].CLK
+clk => c[7].CLK
+clk => c[6].CLK
+clk => c[5].CLK
+clk => c[4].CLK
+clk => c[3].CLK
+clk => c[2].CLK
+clk => c[1].CLK
+clk => c[0].CLK
+clk => i[13].CLK
+clk => i[12].CLK
+clk => i[11].CLK
+clk => i[10].CLK
+clk => i[9].CLK
+clk => i[8].CLK
+clk => i[7].CLK
+clk => i[6].CLK
+clk => i[5].CLK
+clk => i[4].CLK
+clk => i[3].CLK
+clk => i[2].CLK
+clk => i[1].CLK
+clk => i[0].CLK
+clk => zl.CLK
+A => Ad[0].DATAIN
+B => Bd[0].DATAIN
+Z => always2~0.IN1
+zr => zl~0.OUTPUTSELECT
+out[0] <= c[0].DB_MAX_OUTPUT_PORT_TYPE
+out[1] <= c[1].DB_MAX_OUTPUT_PORT_TYPE
+out[2] <= c[2].DB_MAX_OUTPUT_PORT_TYPE
+out[3] <= c[3].DB_MAX_OUTPUT_PORT_TYPE
+out[4] <= c[4].DB_MAX_OUTPUT_PORT_TYPE
+out[5] <= c[5].DB_MAX_OUTPUT_PORT_TYPE
+out[6] <= c[6].DB_MAX_OUTPUT_PORT_TYPE
+out[7] <= c[7].DB_MAX_OUTPUT_PORT_TYPE
+out[8] <= c[8].DB_MAX_OUTPUT_PORT_TYPE
+out[9] <= c[9].DB_MAX_OUTPUT_PORT_TYPE
+out[10] <= c[10].DB_MAX_OUTPUT_PORT_TYPE
+out[11] <= c[11].DB_MAX_OUTPUT_PORT_TYPE
+out[12] <= c[12].DB_MAX_OUTPUT_PORT_TYPE
+out[13] <= c[13].DB_MAX_OUTPUT_PORT_TYPE
+out[14] <= i[0].DB_MAX_OUTPUT_PORT_TYPE
+out[15] <= i[1].DB_MAX_OUTPUT_PORT_TYPE
+out[16] <= i[2].DB_MAX_OUTPUT_PORT_TYPE
+out[17] <= i[3].DB_MAX_OUTPUT_PORT_TYPE
+out[18] <= i[4].DB_MAX_OUTPUT_PORT_TYPE
+out[19] <= i[5].DB_MAX_OUTPUT_PORT_TYPE
+out[20] <= i[6].DB_MAX_OUTPUT_PORT_TYPE
+out[21] <= i[7].DB_MAX_OUTPUT_PORT_TYPE
+out[22] <= i[8].DB_MAX_OUTPUT_PORT_TYPE
+out[23] <= i[9].DB_MAX_OUTPUT_PORT_TYPE
+out[24] <= i[10].DB_MAX_OUTPUT_PORT_TYPE
+out[25] <= i[11].DB_MAX_OUTPUT_PORT_TYPE
+out[26] <= i[12].DB_MAX_OUTPUT_PORT_TYPE
+out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
+out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|quad:q1
+clk => Ad[2].CLK
+clk => Ad[1].CLK
+clk => Ad[0].CLK
+clk => Bd[2].CLK
+clk => Bd[1].CLK
+clk => Bd[0].CLK
+clk => Zc[2].CLK
+clk => Zc[1].CLK
+clk => Zc[0].CLK
+clk => last_good.CLK
+clk => c[13].CLK
+clk => c[12].CLK
+clk => c[11].CLK
+clk => c[10].CLK
+clk => c[9].CLK
+clk => c[8].CLK
+clk => c[7].CLK
+clk => c[6].CLK
+clk => c[5].CLK
+clk => c[4].CLK
+clk => c[3].CLK
+clk => c[2].CLK
+clk => c[1].CLK
+clk => c[0].CLK
+clk => i[13].CLK
+clk => i[12].CLK
+clk => i[11].CLK
+clk => i[10].CLK
+clk => i[9].CLK
+clk => i[8].CLK
+clk => i[7].CLK
+clk => i[6].CLK
+clk => i[5].CLK
+clk => i[4].CLK
+clk => i[3].CLK
+clk => i[2].CLK
+clk => i[1].CLK
+clk => i[0].CLK
+clk => zl.CLK
+A => Ad[0].DATAIN
+B => Bd[0].DATAIN
+Z => always2~0.IN1
+zr => zl~0.OUTPUTSELECT
+out[0] <= c[0].DB_MAX_OUTPUT_PORT_TYPE
+out[1] <= c[1].DB_MAX_OUTPUT_PORT_TYPE
+out[2] <= c[2].DB_MAX_OUTPUT_PORT_TYPE
+out[3] <= c[3].DB_MAX_OUTPUT_PORT_TYPE
+out[4] <= c[4].DB_MAX_OUTPUT_PORT_TYPE
+out[5] <= c[5].DB_MAX_OUTPUT_PORT_TYPE
+out[6] <= c[6].DB_MAX_OUTPUT_PORT_TYPE
+out[7] <= c[7].DB_MAX_OUTPUT_PORT_TYPE
+out[8] <= c[8].DB_MAX_OUTPUT_PORT_TYPE
+out[9] <= c[9].DB_MAX_OUTPUT_PORT_TYPE
+out[10] <= c[10].DB_MAX_OUTPUT_PORT_TYPE
+out[11] <= c[11].DB_MAX_OUTPUT_PORT_TYPE
+out[12] <= c[12].DB_MAX_OUTPUT_PORT_TYPE
+out[13] <= c[13].DB_MAX_OUTPUT_PORT_TYPE
+out[14] <= i[0].DB_MAX_OUTPUT_PORT_TYPE
+out[15] <= i[1].DB_MAX_OUTPUT_PORT_TYPE
+out[16] <= i[2].DB_MAX_OUTPUT_PORT_TYPE
+out[17] <= i[3].DB_MAX_OUTPUT_PORT_TYPE
+out[18] <= i[4].DB_MAX_OUTPUT_PORT_TYPE
+out[19] <= i[5].DB_MAX_OUTPUT_PORT_TYPE
+out[20] <= i[6].DB_MAX_OUTPUT_PORT_TYPE
+out[21] <= i[7].DB_MAX_OUTPUT_PORT_TYPE
+out[22] <= i[8].DB_MAX_OUTPUT_PORT_TYPE
+out[23] <= i[9].DB_MAX_OUTPUT_PORT_TYPE
+out[24] <= i[10].DB_MAX_OUTPUT_PORT_TYPE
+out[25] <= i[11].DB_MAX_OUTPUT_PORT_TYPE
+out[26] <= i[12].DB_MAX_OUTPUT_PORT_TYPE
+out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
+out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|quad:q2
+clk => Ad[2].CLK
+clk => Ad[1].CLK
+clk => Ad[0].CLK
+clk => Bd[2].CLK
+clk => Bd[1].CLK
+clk => Bd[0].CLK
+clk => Zc[2].CLK
+clk => Zc[1].CLK
+clk => Zc[0].CLK
+clk => last_good.CLK
+clk => c[13].CLK
+clk => c[12].CLK
+clk => c[11].CLK
+clk => c[10].CLK
+clk => c[9].CLK
+clk => c[8].CLK
+clk => c[7].CLK
+clk => c[6].CLK
+clk => c[5].CLK
+clk => c[4].CLK
+clk => c[3].CLK
+clk => c[2].CLK
+clk => c[1].CLK
+clk => c[0].CLK
+clk => i[13].CLK
+clk => i[12].CLK
+clk => i[11].CLK
+clk => i[10].CLK
+clk => i[9].CLK
+clk => i[8].CLK
+clk => i[7].CLK
+clk => i[6].CLK
+clk => i[5].CLK
+clk => i[4].CLK
+clk => i[3].CLK
+clk => i[2].CLK
+clk => i[1].CLK
+clk => i[0].CLK
+clk => zl.CLK
+A => Ad[0].DATAIN
+B => Bd[0].DATAIN
+Z => always2~0.IN1
+zr => zl~0.OUTPUTSELECT
+out[0] <= c[0].DB_MAX_OUTPUT_PORT_TYPE
+out[1] <= c[1].DB_MAX_OUTPUT_PORT_TYPE
+out[2] <= c[2].DB_MAX_OUTPUT_PORT_TYPE
+out[3] <= c[3].DB_MAX_OUTPUT_PORT_TYPE
+out[4] <= c[4].DB_MAX_OUTPUT_PORT_TYPE
+out[5] <= c[5].DB_MAX_OUTPUT_PORT_TYPE
+out[6] <= c[6].DB_MAX_OUTPUT_PORT_TYPE
+out[7] <= c[7].DB_MAX_OUTPUT_PORT_TYPE
+out[8] <= c[8].DB_MAX_OUTPUT_PORT_TYPE
+out[9] <= c[9].DB_MAX_OUTPUT_PORT_TYPE
+out[10] <= c[10].DB_MAX_OUTPUT_PORT_TYPE
+out[11] <= c[11].DB_MAX_OUTPUT_PORT_TYPE
+out[12] <= c[12].DB_MAX_OUTPUT_PORT_TYPE
+out[13] <= c[13].DB_MAX_OUTPUT_PORT_TYPE
+out[14] <= i[0].DB_MAX_OUTPUT_PORT_TYPE
+out[15] <= i[1].DB_MAX_OUTPUT_PORT_TYPE
+out[16] <= i[2].DB_MAX_OUTPUT_PORT_TYPE
+out[17] <= i[3].DB_MAX_OUTPUT_PORT_TYPE
+out[18] <= i[4].DB_MAX_OUTPUT_PORT_TYPE
+out[19] <= i[5].DB_MAX_OUTPUT_PORT_TYPE
+out[20] <= i[6].DB_MAX_OUTPUT_PORT_TYPE
+out[21] <= i[7].DB_MAX_OUTPUT_PORT_TYPE
+out[22] <= i[8].DB_MAX_OUTPUT_PORT_TYPE
+out[23] <= i[9].DB_MAX_OUTPUT_PORT_TYPE
+out[24] <= i[10].DB_MAX_OUTPUT_PORT_TYPE
+out[25] <= i[11].DB_MAX_OUTPUT_PORT_TYPE
+out[26] <= i[12].DB_MAX_OUTPUT_PORT_TYPE
+out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
+out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|pluto_test_spi|quad:q3
+clk => Ad[2].CLK
+clk => Ad[1].CLK
+clk => Ad[0].CLK
+clk => Bd[2].CLK
+clk => Bd[1].CLK
+clk => Bd[0].CLK
+clk => Zc[2].CLK
+clk => Zc[1].CLK
+clk => Zc[0].CLK
+clk => last_good.CLK
+clk => c[13].CLK
+clk => c[12].CLK
+clk => c[11].CLK
+clk => c[10].CLK
+clk => c[9].CLK
+clk => c[8].CLK
+clk => c[7].CLK
+clk => c[6].CLK
+clk => c[5].CLK
+clk => c[4].CLK
+clk => c[3].CLK
+clk => c[2].CLK
+clk => c[1].CLK
+clk => c[0].CLK
+clk => i[13].CLK
+clk => i[12].CLK
+clk => i[11].CLK
+clk => i[10].CLK
+clk => i[9].CLK
+clk => i[8].CLK
+clk => i[7].CLK
+clk => i[6].CLK
+clk => i[5].CLK
+clk => i[4].CLK
+clk => i[3].CLK
+clk => i[2].CLK
+clk => i[1].CLK
+clk => i[0].CLK
+clk => zl.CLK
+A => Ad[0].DATAIN
+B => Bd[0].DATAIN
+Z => always2~0.IN1
+zr => zl~0.OUTPUTSELECT
+out[0] <= c[0].DB_MAX_OUTPUT_PORT_TYPE
+out[1] <= c[1].DB_MAX_OUTPUT_PORT_TYPE
+out[2] <= c[2].DB_MAX_OUTPUT_PORT_TYPE
+out[3] <= c[3].DB_MAX_OUTPUT_PORT_TYPE
+out[4] <= c[4].DB_MAX_OUTPUT_PORT_TYPE
+out[5] <= c[5].DB_MAX_OUTPUT_PORT_TYPE
+out[6] <= c[6].DB_MAX_OUTPUT_PORT_TYPE
+out[7] <= c[7].DB_MAX_OUTPUT_PORT_TYPE
+out[8] <= c[8].DB_MAX_OUTPUT_PORT_TYPE
+out[9] <= c[9].DB_MAX_OUTPUT_PORT_TYPE
+out[10] <= c[10].DB_MAX_OUTPUT_PORT_TYPE
+out[11] <= c[11].DB_MAX_OUTPUT_PORT_TYPE
+out[12] <= c[12].DB_MAX_OUTPUT_PORT_TYPE
+out[13] <= c[13].DB_MAX_OUTPUT_PORT_TYPE
+out[14] <= i[0].DB_MAX_OUTPUT_PORT_TYPE
+out[15] <= i[1].DB_MAX_OUTPUT_PORT_TYPE
+out[16] <= i[2].DB_MAX_OUTPUT_PORT_TYPE
+out[17] <= i[3].DB_MAX_OUTPUT_PORT_TYPE
+out[18] <= i[4].DB_MAX_OUTPUT_PORT_TYPE
+out[19] <= i[5].DB_MAX_OUTPUT_PORT_TYPE
+out[20] <= i[6].DB_MAX_OUTPUT_PORT_TYPE
+out[21] <= i[7].DB_MAX_OUTPUT_PORT_TYPE
+out[22] <= i[8].DB_MAX_OUTPUT_PORT_TYPE
+out[23] <= i[9].DB_MAX_OUTPUT_PORT_TYPE
+out[24] <= i[10].DB_MAX_OUTPUT_PORT_TYPE
+out[25] <= i[11].DB_MAX_OUTPUT_PORT_TYPE
+out[26] <= i[12].DB_MAX_OUTPUT_PORT_TYPE
+out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
+out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
+
+

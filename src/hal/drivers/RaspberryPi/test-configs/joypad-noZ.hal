@@ -1,0 +1,94 @@
+#    Hal configuration file to move a cnc machine using a joypad using joyhandle component
+
+#    Copyright 2008 Paul Willutzki <paul[at]willutzki[dot]de>
+
+#    Licence: GPL
+
+#    Version 3
+
+#    This Hal-File needs the joyhandle component.
+#    This uses the following formula for a non linear joypad movements:
+#    y = (scale * (a*x^power + b*x)) + offset  
+#
+#    The parameters a and b are adjusted in such a way, that the function starts at (deadband,offset) and ends at (1,scale+offset).
+#    Negative values will be treated point symetrically to origin. Values -deadband < x < +deadband will be set to zero.
+#    Values x > 1 and x < -1 will be skipped to +-scale+offset. Negative scale values invert the movement.
+#    With power one can adjust the nonlinearity (default = 2).
+#    Default for deadband is 0.
+#    Valid values are: power >= 1.0 (reasonable values are 1.x .. 4-5), 0 <= deadband < 0.99 (reasonable 0.1). If you use high deadbands (>0.5) you need higher power values to smoothly start at (deadband,offset). 
+#    The additional offset component can be set in special cases (default = 0).
+#    All values can be adjusted for each instance (joypad axis) separately.
+
+#    Please take also a look at the manpages for johandle.
+
+#    Insert the following lines in the INI-File (section [HAL])
+#    HALUI = halui
+#    HALFILE = joypad_V3.hal
+
+# Load the hal_input component that creates pins for axes and buttons
+# See man hal_input for details and finding input devices
+loadusr -W hal_input -KRAL Saitek
+
+# load joyhandle component and attach to threads (in this case 3 instances)
+loadrt joyhandle count=3
+addf joyhandle.0 servo-thread   # x
+addf joyhandle.1 servo-thread   # y
+
+
+setp halui.jog-speed   720	# desired maximum jog speed mm/min
+
+# --Start-- These parameters are used to set up joyhandle
+setp halui.jog-deadband   0.	# important: default value is 0.2, that would override joyhandle.deadband
+setp joyhandle.0.power 3.	# select nonlinearity to handele low jog values
+setp joyhandle.1.power 3.
+setp joyhandle.0.deadband 0.1
+setp joyhandle.1.deadband 0.1
+setp joyhandle.0.scale  1.	
+setp joyhandle.1.scale -1.	# negative values invert jogging
+# --End--
+
+# connect hal_input to halui via joyhandle (in case use your own axes-names)
+# input.0.abs-??-position
+# ??: x and y ---- left joystick
+# ??: rx and ry ---- right joystick
+# ??: z ---- left and right shoulder trigger
+# ??: hat0x and hat0y ---- hat button
+net velX input.0.abs-x-position => joyhandle.0.in
+net velXout joyhandle.0.out => halui.jog.0.analog
+net velY input.0.abs-y-position => joyhandle.1.in
+net velYout joyhandle.1.out => halui.jog.1.analog
+
+# connect hal_joypad directly to halui without joyhandle (in case use your own axes-names)
+#net velX joypad.axis.3 => halui.jog.0.analog
+#net velY joypad.axis.2 => halui.jog.1.analog
+
+# [BUTTON-SAMPLES] use your own joypad pin-names
+#One button sample
+# back-knopf
+net spindleOff input.0.btn-base3 => halui.spindle.stop
+# start-knopf
+net spindleOn input.0.btn-base4 => halui.spindle.start
+# B-knopf
+net machineOff input.0.btn-thumb2 => halui.machine.off
+# A-knopf
+net machineOn input.0.btn-thumb => halui.machine.on
+# FPS-knopf
+net machineESTOP input.0.key-300 => halui.estop.activate
+
+# linker schulter-knopf
+##		input.0.btn-top2
+# rechter schulter-knopf
+##		input.0.btn-pinkie
+# X-knopf
+##		input.0.btn-joystick
+# Y-knopf
+##		input.0.btn-top
+net test input.0.btn-top => pluto-servo.dout.07
+
+# rechter joystick button
+##		input.0.btn-base6
+# linker joystick button
+##		input.0.btn-base5
+
+
+

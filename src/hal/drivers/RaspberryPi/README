@@ -1,0 +1,5 @@
+Compiling the Pluto SPI driver for the RasPi:
+
+	sudo comp --install pluto_servo_rpspi.comp
+	
+	

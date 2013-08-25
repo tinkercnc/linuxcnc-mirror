@@ -1,0 +1,2 @@
+{ "Info" "0" "" "Info: Successfully restored '//GAUNER/matsche/src/fpga/altera/spi/pluto-spi_tmp_archive.qar' into the '//GAUNER/matsche/src/fpga/altera/spi/test' directory" {  } {  } 0 0 "Successfully restored '//GAUNER/matsche/src/fpga/altera/spi/pluto-spi_tmp_archive.qar' into the '//GAUNER/matsche/src/fpga/altera/spi/test' directory" 0 0 "" 0 -1}
+{ "Info" "0" "" "Info: Generated report 'pluto-spi.restore.rpt'" {  } {  } 0 0 "Generated report 'pluto-spi.restore.rpt'" 0 0 "" 0 -1}

@@ -1,0 +1,720 @@
+Classic Timing Analyzer report for pluto-spi
+Sat Aug 10 23:18:23 2013
+Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Timing Analyzer Summary
+  3. Timing Analyzer Settings
+  4. Clock Settings Summary
+  5. Clock Setup: 'clk'
+  6. tsu
+  7. tco
+  8. th
+  9. Timing Analyzer Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2009 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Timing Analyzer Summary                                                                                                                                                                                                    ;
++------------------------------+-------+---------------+----------------------------------+-----------------------------------------------------------------------------+-------------+------------+----------+--------------+
+; Type                         ; Slack ; Required Time ; Actual Time                      ; From                                                                        ; To          ; From Clock ; To Clock ; Failed Paths ;
++------------------------------+-------+---------------+----------------------------------+-----------------------------------------------------------------------------+-------------+------------+----------+--------------+
+; Worst-case tsu               ; N/A   ; None          ; 19.400 ns                        ; din[2]                                                                      ; data_buf[2] ; --         ; clk      ; 0            ;
+; Worst-case tco               ; N/A   ; None          ; 29.300 ns                        ; pwm0[14]                                                                    ; up[1]       ; clk        ; --       ; 0            ;
+; Worst-case th                ; N/A   ; None          ; 0.900 ns                         ; SCK                                                                         ; SCKr[0]     ; --         ; clk      ; 0            ;
+; Clock Setup: 'clk'           ; N/A   ; None          ; 56.82 MHz ( period = 17.600 ns ) ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[4] ; clk        ; clk      ; 0            ;
+; Total number of failed paths ;       ;               ;                                  ;                                                                             ;             ;            ;          ; 0            ;
++------------------------------+-------+---------------+----------------------------------+-----------------------------------------------------------------------------+-------------+------------+----------+--------------+
+
+
++--------------------------------------------------------------------------------------------------------------------+
+; Timing Analyzer Settings                                                                                           ;
++---------------------------------------------------------------------+--------------------+------+----+-------------+
+; Option                                                              ; Setting            ; From ; To ; Entity Name ;
++---------------------------------------------------------------------+--------------------+------+----+-------------+
+; Device Name                                                         ; EP1K10TC100-3      ;      ;    ;             ;
+; Timing Models                                                       ; Final              ;      ;    ;             ;
+; Default hold multicycle                                             ; Same as Multicycle ;      ;    ;             ;
+; Cut paths between unrelated clock domains                           ; On                 ;      ;    ;             ;
+; Cut off read during write signal paths                              ; On                 ;      ;    ;             ;
+; Cut off feedback from I/O pins                                      ; On                 ;      ;    ;             ;
+; Report Combined Fast/Slow Timing                                    ; Off                ;      ;    ;             ;
+; Ignore Clock Settings                                               ; Off                ;      ;    ;             ;
+; Analyze latches as synchronous elements                             ; On                 ;      ;    ;             ;
+; Enable Recovery/Removal analysis                                    ; Off                ;      ;    ;             ;
+; Enable Clock Latency                                                ; Off                ;      ;    ;             ;
+; Use TimeQuest Timing Analyzer                                       ; Off                ;      ;    ;             ;
+; Minimum Core Junction Temperature                                   ; 0                  ;      ;    ;             ;
+; Maximum Core Junction Temperature                                   ; 85                 ;      ;    ;             ;
+; Number of source nodes to report per destination node               ; 10                 ;      ;    ;             ;
+; Number of destination nodes to report                               ; 10                 ;      ;    ;             ;
+; Number of paths to report                                           ; 200                ;      ;    ;             ;
+; Report Minimum Timing Checks                                        ; Off                ;      ;    ;             ;
+; Use Fast Timing Models                                              ; Off                ;      ;    ;             ;
+; Report IO Paths Separately                                          ; Off                ;      ;    ;             ;
+; Perform Multicorner Analysis                                        ; Off                ;      ;    ;             ;
+; Reports the worst-case path for each clock domain and analysis      ; Off                ;      ;    ;             ;
+; Removes common clock path pessimism (CCPP) during slack computation ; Off                ;      ;    ;             ;
+; Output I/O Timing Endpoint                                          ; Near End           ;      ;    ;             ;
++---------------------------------------------------------------------+--------------------+------+----+-------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Clock Settings Summary                                                                                                                                                             ;
++-----------------+--------------------+----------+------------------+---------------+--------------+----------+-----------------------+---------------------+--------+--------------+
+; Clock Node Name ; Clock Setting Name ; Type     ; Fmax Requirement ; Early Latency ; Late Latency ; Based on ; Multiply Base Fmax by ; Divide Base Fmax by ; Offset ; Phase offset ;
++-----------------+--------------------+----------+------------------+---------------+--------------+----------+-----------------------+---------------------+--------+--------------+
+; clk             ;                    ; User Pin ; None             ; 0.000 ns      ; 0.000 ns     ; --       ; N/A                   ; N/A                 ; N/A    ;              ;
++-----------------+--------------------+----------+------------------+---------------+--------------+----------+-----------------------+---------------------+--------+--------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Clock Setup: 'clk'                                                                                                                                                                                                                                                                                     ;
++-----------------------------------------+-----------------------------------------------------+-----------------------------------------------------------------------------+--------------+------------+----------+-----------------------------+---------------------------+-------------------------+
+; Slack                                   ; Actual fmax (period)                                ; From                                                                        ; To           ; From Clock ; To Clock ; Required Setup Relationship ; Required Longest P2P Time ; Actual Longest P2P Time ;
++-----------------------------------------+-----------------------------------------------------+-----------------------------------------------------------------------------+--------------+------------+----------+-----------------------------+---------------------------+-------------------------+
+; N/A                                     ; 56.82 MHz ( period = 17.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 16.500 ns               ;
+; N/A                                     ; 57.47 MHz ( period = 17.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 16.300 ns               ;
+; N/A                                     ; 57.80 MHz ( period = 17.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 16.200 ns               ;
+; N/A                                     ; 58.48 MHz ( period = 17.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 16.000 ns               ;
+; N/A                                     ; 58.48 MHz ( period = 17.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 16.000 ns               ;
+; N/A                                     ; 58.82 MHz ( period = 17.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 15.900 ns               ;
+; N/A                                     ; 58.82 MHz ( period = 17.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[1]  ; clk        ; clk      ; None                        ; None                      ; 15.900 ns               ;
+; N/A                                     ; 59.52 MHz ( period = 16.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[6] ; clk        ; clk      ; None                        ; None                      ; 15.700 ns               ;
+; N/A                                     ; 59.52 MHz ( period = 16.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[1]  ; clk        ; clk      ; None                        ; None                      ; 15.700 ns               ;
+; N/A                                     ; 59.88 MHz ( period = 16.700 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 15.600 ns               ;
+; N/A                                     ; 59.88 MHz ( period = 16.700 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[1]  ; clk        ; clk      ; None                        ; None                      ; 15.600 ns               ;
+; N/A                                     ; 60.24 MHz ( period = 16.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[6] ; clk        ; clk      ; None                        ; None                      ; 15.500 ns               ;
+; N/A                                     ; 60.24 MHz ( period = 16.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 15.500 ns               ;
+; N/A                                     ; 60.61 MHz ( period = 16.500 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[2]  ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 15.400 ns               ;
+; N/A                                     ; 60.61 MHz ( period = 16.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[1]  ; clk        ; clk      ; None                        ; None                      ; 15.400 ns               ;
+; N/A                                     ; 60.98 MHz ( period = 16.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[6]      ; clk        ; clk      ; None                        ; None                      ; 15.300 ns               ;
+; N/A                                     ; 60.98 MHz ( period = 16.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[0]  ; clk        ; clk      ; None                        ; None                      ; 15.300 ns               ;
+; N/A                                     ; 61.35 MHz ( period = 16.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 15.200 ns               ;
+; N/A                                     ; 61.35 MHz ( period = 16.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[7]      ; clk        ; clk      ; None                        ; None                      ; 15.200 ns               ;
+; N/A                                     ; 61.35 MHz ( period = 16.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[5]      ; clk        ; clk      ; None                        ; None                      ; 15.200 ns               ;
+; N/A                                     ; 61.35 MHz ( period = 16.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[4]      ; clk        ; clk      ; None                        ; None                      ; 15.200 ns               ;
+; N/A                                     ; 61.35 MHz ( period = 16.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 15.200 ns               ;
+; N/A                                     ; 61.35 MHz ( period = 16.300 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[10] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 15.200 ns               ;
+; N/A                                     ; 61.73 MHz ( period = 16.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[6]      ; clk        ; clk      ; None                        ; None                      ; 15.100 ns               ;
+; N/A                                     ; 61.73 MHz ( period = 16.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 15.100 ns               ;
+; N/A                                     ; 61.73 MHz ( period = 16.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 15.100 ns               ;
+; N/A                                     ; 61.73 MHz ( period = 16.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 15.100 ns               ;
+; N/A                                     ; 61.73 MHz ( period = 16.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[0]  ; clk        ; clk      ; None                        ; None                      ; 15.100 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[0] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[1] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[2] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[3] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[4] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[5] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[7] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[8] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; real_dout[9] ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[7]      ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; Zpolarity    ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[5]      ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[4]      ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.11 MHz ( period = 16.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[0]  ; clk        ; clk      ; None                        ; None                      ; 15.000 ns               ;
+; N/A                                     ; 62.50 MHz ( period = 16.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 14.900 ns               ;
+; N/A                                     ; 62.50 MHz ( period = 16.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 14.900 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[0] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[1] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[2] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[3] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[4] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[5] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[7] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[8] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; real_dout[9] ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; Zpolarity    ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 62.89 MHz ( period = 15.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[0]  ; clk        ; clk      ; None                        ; None                      ; 14.800 ns               ;
+; N/A                                     ; 63.29 MHz ( period = 15.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[6] ; clk        ; clk      ; None                        ; None                      ; 14.700 ns               ;
+; N/A                                     ; 63.29 MHz ( period = 15.800 ns )                    ; quad:q3|i[4]                                                                ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 14.700 ns               ;
+; N/A                                     ; 63.69 MHz ( period = 15.700 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 14.600 ns               ;
+; N/A                                     ; 64.10 MHz ( period = 15.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[2]      ; clk        ; clk      ; None                        ; None                      ; 14.500 ns               ;
+; N/A                                     ; 64.10 MHz ( period = 15.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[3]      ; clk        ; clk      ; None                        ; None                      ; 14.500 ns               ;
+; N/A                                     ; 64.10 MHz ( period = 15.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[1]      ; clk        ; clk      ; None                        ; None                      ; 14.500 ns               ;
+; N/A                                     ; 64.10 MHz ( period = 15.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[0]      ; clk        ; clk      ; None                        ; None                      ; 14.500 ns               ;
+; N/A                                     ; 64.10 MHz ( period = 15.600 ns )                    ; quad:q3|i[12]                                                               ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 14.500 ns               ;
+; N/A                                     ; 64.52 MHz ( period = 15.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[6] ; clk        ; clk      ; None                        ; None                      ; 14.400 ns               ;
+; N/A                                     ; 64.52 MHz ( period = 15.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 14.400 ns               ;
+; N/A                                     ; 64.52 MHz ( period = 15.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 14.400 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[12]     ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[15]     ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[13]     ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[10]     ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[9]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[6]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm3[8]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[2]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[3]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[1]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[0]      ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 64.94 MHz ( period = 15.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[1]  ; clk        ; clk      ; None                        ; None                      ; 14.300 ns               ;
+; N/A                                     ; 65.36 MHz ( period = 15.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[7]      ; clk        ; clk      ; None                        ; None                      ; 14.200 ns               ;
+; N/A                                     ; 65.36 MHz ( period = 15.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 14.200 ns               ;
+; N/A                                     ; 65.36 MHz ( period = 15.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[5]      ; clk        ; clk      ; None                        ; None                      ; 14.200 ns               ;
+; N/A                                     ; 65.36 MHz ( period = 15.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[4]      ; clk        ; clk      ; None                        ; None                      ; 14.200 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[12]     ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[15]     ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[13]     ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[10]     ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[9]      ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[5] ; pwm3[8]      ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 65.79 MHz ( period = 15.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[1]  ; clk        ; clk      ; None                        ; None                      ; 14.100 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[0] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[1] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[2] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[3] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[4] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[5] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[7] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[8] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; real_dout[9] ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; Zpolarity    ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[6]      ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.23 MHz ( period = 15.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[0]  ; clk        ; clk      ; None                        ; None                      ; 14.000 ns               ;
+; N/A                                     ; 66.67 MHz ( period = 15.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[7]      ; clk        ; clk      ; None                        ; None                      ; 13.900 ns               ;
+; N/A                                     ; 66.67 MHz ( period = 15.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 13.900 ns               ;
+; N/A                                     ; 66.67 MHz ( period = 15.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[5]      ; clk        ; clk      ; None                        ; None                      ; 13.900 ns               ;
+; N/A                                     ; 66.67 MHz ( period = 15.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[4]      ; clk        ; clk      ; None                        ; None                      ; 13.900 ns               ;
+; N/A                                     ; 67.11 MHz ( period = 14.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 13.800 ns               ;
+; N/A                                     ; 67.11 MHz ( period = 14.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[0]  ; clk        ; clk      ; None                        ; None                      ; 13.800 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[0] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[1] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[2] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[3] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[4] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[5] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[7] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[8] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; real_dout[9] ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; Zpolarity    ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 67.57 MHz ( period = 14.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 13.700 ns               ;
+; N/A                                     ; 68.03 MHz ( period = 14.700 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 13.600 ns               ;
+; N/A                                     ; 68.03 MHz ( period = 14.700 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[5]  ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 13.600 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; quad:q2|lpm_counter:c_rtl_5|alt_counter_f10ke:wysi_counter|counter_cell[5]  ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[2]      ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[3]      ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[1]      ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[0]      ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.49 MHz ( period = 14.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 13.500 ns               ;
+; N/A                                     ; 68.97 MHz ( period = 14.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 13.400 ns               ;
+; N/A                                     ; 68.97 MHz ( period = 14.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 13.400 ns               ;
+; N/A                                     ; 69.44 MHz ( period = 14.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[12]     ; clk        ; clk      ; None                        ; None                      ; 13.300 ns               ;
+; N/A                                     ; 69.44 MHz ( period = 14.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[15]     ; clk        ; clk      ; None                        ; None                      ; 13.300 ns               ;
+; N/A                                     ; 69.44 MHz ( period = 14.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[13]     ; clk        ; clk      ; None                        ; None                      ; 13.300 ns               ;
+; N/A                                     ; 69.44 MHz ( period = 14.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[10]     ; clk        ; clk      ; None                        ; None                      ; 13.300 ns               ;
+; N/A                                     ; 69.44 MHz ( period = 14.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[9]      ; clk        ; clk      ; None                        ; None                      ; 13.300 ns               ;
+; N/A                                     ; 69.44 MHz ( period = 14.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[1] ; pwm3[8]      ; clk        ; clk      ; None                        ; None                      ; 13.300 ns               ;
+; N/A                                     ; 69.93 MHz ( period = 14.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[2]      ; clk        ; clk      ; None                        ; None                      ; 13.200 ns               ;
+; N/A                                     ; 69.93 MHz ( period = 14.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[3]      ; clk        ; clk      ; None                        ; None                      ; 13.200 ns               ;
+; N/A                                     ; 69.93 MHz ( period = 14.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[1]      ; clk        ; clk      ; None                        ; None                      ; 13.200 ns               ;
+; N/A                                     ; 69.93 MHz ( period = 14.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[0]      ; clk        ; clk      ; None                        ; None                      ; 13.200 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[12]     ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[15]     ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[13]     ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[10]     ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[6] ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[9]      ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 70.92 MHz ( period = 14.100 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[2] ; pwm3[8]      ; clk        ; clk      ; None                        ; None                      ; 13.000 ns               ;
+; N/A                                     ; 71.43 MHz ( period = 14.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[6] ; clk        ; clk      ; None                        ; None                      ; 12.900 ns               ;
+; N/A                                     ; 72.46 MHz ( period = 13.800 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[6]  ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 12.700 ns               ;
+; N/A                                     ; 72.46 MHz ( period = 13.800 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[12] ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 12.700 ns               ;
+; N/A                                     ; 72.46 MHz ( period = 13.800 ns )                    ; quad:q2|lpm_counter:c_rtl_5|alt_counter_f10ke:wysi_counter|counter_cell[11] ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 12.700 ns               ;
+; N/A                                     ; 72.99 MHz ( period = 13.700 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[6]      ; clk        ; clk      ; None                        ; None                      ; 12.600 ns               ;
+; N/A                                     ; 72.99 MHz ( period = 13.700 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[4]  ; data_buf[4]  ; clk        ; clk      ; None                        ; None                      ; 12.600 ns               ;
+; N/A                                     ; 72.99 MHz ( period = 13.700 ns )                    ; quad:q2|lpm_counter:c_rtl_5|alt_counter_f10ke:wysi_counter|counter_cell[3]  ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 12.600 ns               ;
+; N/A                                     ; 73.53 MHz ( period = 13.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[7]      ; clk        ; clk      ; None                        ; None                      ; 12.500 ns               ;
+; N/A                                     ; 73.53 MHz ( period = 13.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; pwm3[6]      ; clk        ; clk      ; None                        ; None                      ; 12.500 ns               ;
+; N/A                                     ; 73.53 MHz ( period = 13.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[5]      ; clk        ; clk      ; None                        ; None                      ; 12.500 ns               ;
+; N/A                                     ; 73.53 MHz ( period = 13.600 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[4]      ; clk        ; clk      ; None                        ; None                      ; 12.500 ns               ;
+; N/A                                     ; 73.53 MHz ( period = 13.600 ns )                    ; quad:q1|i[4]                                                                ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 12.500 ns               ;
+; N/A                                     ; 74.07 MHz ( period = 13.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 12.400 ns               ;
+; N/A                                     ; 74.07 MHz ( period = 13.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; pwm3[7]      ; clk        ; clk      ; None                        ; None                      ; 12.400 ns               ;
+; N/A                                     ; 74.07 MHz ( period = 13.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; pwm3[5]      ; clk        ; clk      ; None                        ; None                      ; 12.400 ns               ;
+; N/A                                     ; 74.07 MHz ( period = 13.500 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; pwm3[4]      ; clk        ; clk      ; None                        ; None                      ; 12.400 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[0] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[1] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[2] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[3] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[4] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[5] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[7] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[8] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; real_dout[9] ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 74.63 MHz ( period = 13.400 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; Zpolarity    ; clk        ; clk      ; None                        ; None                      ; 12.300 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[7]  ; data_buf[7]  ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[0] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[1] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[2] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[3] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[4] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[5] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[7] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[8] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; real_dout[9] ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; Zpolarity    ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.19 MHz ( period = 13.300 ns )                    ; quad:q1|i[12]                                                               ; data_buf[2]  ; clk        ; clk      ; None                        ; None                      ; 12.200 ns               ;
+; N/A                                     ; 75.76 MHz ( period = 13.200 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[6]  ; clk        ; clk      ; None                        ; None                      ; 12.100 ns               ;
+; N/A                                     ; 76.92 MHz ( period = 13.000 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 11.900 ns               ;
+; N/A                                     ; 77.52 MHz ( period = 12.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4] ; pwm1[10]     ; clk        ; clk      ; None                        ; None                      ; 11.800 ns               ;
+; N/A                                     ; 77.52 MHz ( period = 12.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; data_buf[5]  ; clk        ; clk      ; None                        ; None                      ; 11.800 ns               ;
+; N/A                                     ; 77.52 MHz ( period = 12.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[2]      ; clk        ; clk      ; None                        ; None                      ; 11.800 ns               ;
+; N/A                                     ; 77.52 MHz ( period = 12.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[3]      ; clk        ; clk      ; None                        ; None                      ; 11.800 ns               ;
+; N/A                                     ; 77.52 MHz ( period = 12.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[1]      ; clk        ; clk      ; None                        ; None                      ; 11.800 ns               ;
+; N/A                                     ; 77.52 MHz ( period = 12.900 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[3] ; pwm3[0]      ; clk        ; clk      ; None                        ; None                      ; 11.800 ns               ;
+; N/A                                     ; 78.13 MHz ( period = 12.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; pwm3[1]      ; clk        ; clk      ; None                        ; None                      ; 11.700 ns               ;
+; N/A                                     ; 78.13 MHz ( period = 12.800 ns )                    ; lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[0] ; pwm3[0]      ; clk        ; clk      ; None                        ; None                      ; 11.700 ns               ;
+; N/A                                     ; 78.13 MHz ( period = 12.800 ns )                    ; quad:q3|lpm_counter:c_rtl_6|alt_counter_f10ke:wysi_counter|counter_cell[3]  ; data_buf[3]  ; clk        ; clk      ; None                        ; None                      ; 11.700 ns               ;
+; Timing analysis restricted to 200 rows. ; To change the limit use Settings (Assignments menu) ;                                                                             ;              ;            ;          ;                             ;                           ;                         ;
++-----------------------------------------+-----------------------------------------------------+-----------------------------------------------------------------------------+--------------+------------+----------+-----------------------------+---------------------------+-------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------+
+; tsu                                                                                                                                    ;
++-------+--------------+------------+----------+------------------------------------------------------------------------------+----------+
+; Slack ; Required tsu ; Actual tsu ; From     ; To                                                                           ; To Clock ;
++-------+--------------+------------+----------+------------------------------------------------------------------------------+----------+
+; N/A   ; None         ; 19.400 ns  ; din[2]   ; data_buf[2]                                                                  ; clk      ;
+; N/A   ; None         ; 18.800 ns  ; quadZ[2] ; data_buf[2]                                                                  ; clk      ;
+; N/A   ; None         ; 18.700 ns  ; quadA[2] ; data_buf[2]                                                                  ; clk      ;
+; N/A   ; None         ; 18.200 ns  ; quadA[3] ; data_buf[3]                                                                  ; clk      ;
+; N/A   ; None         ; 18.100 ns  ; quadZ[3] ; data_buf[3]                                                                  ; clk      ;
+; N/A   ; None         ; 15.700 ns  ; quadB[0] ; data_buf[4]                                                                  ; clk      ;
+; N/A   ; None         ; 15.600 ns  ; din[4]   ; data_buf[4]                                                                  ; clk      ;
+; N/A   ; None         ; 15.400 ns  ; din[3]   ; data_buf[3]                                                                  ; clk      ;
+; N/A   ; None         ; 14.900 ns  ; quadZ[1] ; data_buf[1]                                                                  ; clk      ;
+; N/A   ; None         ; 14.500 ns  ; din[5]   ; data_buf[5]                                                                  ; clk      ;
+; N/A   ; None         ; 14.300 ns  ; quadA[0] ; data_buf[0]                                                                  ; clk      ;
+; N/A   ; None         ; 13.900 ns  ; quadB[3] ; data_buf[7]                                                                  ; clk      ;
+; N/A   ; None         ; 13.300 ns  ; din[1]   ; data_buf[1]                                                                  ; clk      ;
+; N/A   ; None         ; 13.000 ns  ; quadB[2] ; data_buf[6]                                                                  ; clk      ;
+; N/A   ; None         ; 12.900 ns  ; din[6]   ; data_buf[6]                                                                  ; clk      ;
+; N/A   ; None         ; 12.600 ns  ; din[7]   ; data_buf[7]                                                                  ; clk      ;
+; N/A   ; None         ; 12.200 ns  ; din[0]   ; data_buf[0]                                                                  ; clk      ;
+; N/A   ; None         ; 10.400 ns  ; quadZ[1] ; quad:q1|Zc[1]                                                                ; clk      ;
+; N/A   ; None         ; 10.100 ns  ; quadZ[0] ; data_buf[0]                                                                  ; clk      ;
+; N/A   ; None         ; 10.100 ns  ; quadZ[2] ; quad:q2|Zc[1]                                                                ; clk      ;
+; N/A   ; None         ; 10.000 ns  ; quadA[1] ; data_buf[1]                                                                  ; clk      ;
+; N/A   ; None         ; 9.900 ns   ; quadZ[3] ; quad:q3|Zc[1]                                                                ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[6] ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[5] ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[4] ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[3] ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[2] ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[1] ; clk      ;
+; N/A   ; None         ; 9.200 ns   ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[0] ; clk      ;
+; N/A   ; None         ; 7.900 ns   ; quadZ[1] ; quad:q1|Zc[0]                                                                ; clk      ;
+; N/A   ; None         ; 7.900 ns   ; quadZ[1] ; quad:q1|Zc[2]                                                                ; clk      ;
+; N/A   ; None         ; 7.700 ns   ; quadB[1] ; data_buf[5]                                                                  ; clk      ;
+; N/A   ; None         ; 7.600 ns   ; quadZ[2] ; quad:q2|Zc[2]                                                                ; clk      ;
+; N/A   ; None         ; 7.600 ns   ; quadZ[2] ; quad:q2|Zc[0]                                                                ; clk      ;
+; N/A   ; None         ; 7.400 ns   ; quadZ[3] ; quad:q3|Zc[2]                                                                ; clk      ;
+; N/A   ; None         ; 7.400 ns   ; quadZ[3] ; quad:q3|Zc[0]                                                                ; clk      ;
+; N/A   ; None         ; 6.100 ns   ; quadA[0] ; quad:q0|Ad[0]                                                                ; clk      ;
+; N/A   ; None         ; 6.100 ns   ; quadB[0] ; quad:q0|Bd[0]                                                                ; clk      ;
+; N/A   ; None         ; 5.900 ns   ; MOSI     ; MOSIr[0]                                                                     ; clk      ;
+; N/A   ; None         ; 5.800 ns   ; quadB[2] ; quad:q2|Bd[0]                                                                ; clk      ;
+; N/A   ; None         ; 5.800 ns   ; SSEL     ; SSELr[0]                                                                     ; clk      ;
+; N/A   ; None         ; 5.600 ns   ; quadZ[0] ; quad:q0|Zc[1]                                                                ; clk      ;
+; N/A   ; None         ; 5.500 ns   ; quadA[2] ; quad:q2|Ad[0]                                                                ; clk      ;
+; N/A   ; None         ; 5.100 ns   ; quadA[3] ; quad:q3|Ad[0]                                                                ; clk      ;
+; N/A   ; None         ; 5.100 ns   ; quadB[3] ; quad:q3|Bd[0]                                                                ; clk      ;
+; N/A   ; None         ; 3.100 ns   ; quadZ[0] ; quad:q0|Zc[0]                                                                ; clk      ;
+; N/A   ; None         ; 3.100 ns   ; quadZ[0] ; quad:q0|Zc[2]                                                                ; clk      ;
+; N/A   ; None         ; 1.000 ns   ; quadA[1] ; quad:q1|Ad[0]                                                                ; clk      ;
+; N/A   ; None         ; 1.000 ns   ; quadB[1] ; quad:q1|Bd[0]                                                                ; clk      ;
+; N/A   ; None         ; 1.000 ns   ; SCK      ; SCKr[0]                                                                      ; clk      ;
++-------+--------------+------------+----------+------------------------------------------------------------------------------+----------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; tco                                                                                                                                                                                                              ;
++-----------------------------------------+-----------------------------------------------------+------------+------------------------------------------------------------------------------+---------+------------+
+; Slack                                   ; Required tco                                        ; Actual tco ; From                                                                         ; To      ; From Clock ;
++-----------------------------------------+-----------------------------------------------------+------------+------------------------------------------------------------------------------+---------+------------+
+; N/A                                     ; None                                                ; 29.300 ns  ; pwm0[14]                                                                     ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 29.300 ns  ; pwm0[14]                                                                     ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 29.000 ns  ; pwm0[14]                                                                     ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 28.300 ns  ; pwm0[14]                                                                     ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 28.300 ns  ; pwm0[14]                                                                     ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 28.300 ns  ; pwm0[14]                                                                     ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 28.200 ns  ; pwm0[14]                                                                     ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 27.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 27.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 27.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 27.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 27.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 27.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 27.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 27.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 27.100 ns  ; pwm0[14]                                                                     ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 27.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 27.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 26.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 26.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 26.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 26.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 26.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 26.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 26.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 26.600 ns  ; pwm0[14]                                                                     ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 26.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 26.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 26.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 26.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 26.400 ns  ; pwm3[3]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 26.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 26.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 26.200 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 26.100 ns  ; pwm1[6]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 26.100 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 26.100 ns  ; pwm1[6]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 26.100 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 26.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 26.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 25.900 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 25.900 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 25.900 ns  ; pwm1[7]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 25.900 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 25.900 ns  ; pwm1[7]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 25.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 25.700 ns  ; pwm1[0]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 25.700 ns  ; pwm1[0]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 25.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 25.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 25.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 25.500 ns  ; pwm1[1]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 25.500 ns  ; pwm1[1]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 25.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 25.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 25.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 25.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 25.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 25.300 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 25.300 ns  ; pwm2[6]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 25.200 ns  ; pwm3[3]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 25.200 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 25.100 ns  ; pwm3[7]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 25.100 ns  ; pwm3[6]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 25.100 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 25.000 ns  ; pwm2[7]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 25.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 24.900 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 24.900 ns  ; pwm0[6]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.900 ns  ; pwm0[6]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.900 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 24.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 24.800 ns  ; pwm1[2]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 24.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 24.800 ns  ; pwm1[2]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 24.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 24.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; pwm0[7]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; pwm0[7]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 24.600 ns  ; pwm1[3]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 24.600 ns  ; pwm0[0]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 24.600 ns  ; pwm1[3]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 24.600 ns  ; pwm0[0]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 24.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 24.500 ns  ; pwm2[6]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 24.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.400 ns  ; pwm0[1]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 24.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.400 ns  ; pwm0[1]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 24.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 24.300 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 24.200 ns  ; pwm2[7]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 24.100 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 24.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 24.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 23.900 ns  ; pwm3[7]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 23.900 ns  ; pwm3[6]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 23.800 ns  ; pwm3[0]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 23.800 ns  ; pwm2[0]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 23.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 23.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 23.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 23.600 ns  ; pwm3[1]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 23.600 ns  ; pwm2[1]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 23.600 ns  ; pwm0[2]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 23.600 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 23.600 ns  ; pwm0[2]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 23.500 ns  ; pwm2[3]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 23.400 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; pwm1[5]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; pwm0[3]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; pwm1[5]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; pwm0[3]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 23.200 ns  ; pwm0[6]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 23.100 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 23.000 ns  ; pwm2[0]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 23.000 ns  ; pwm0[7]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 23.000 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 22.900 ns  ; pwm0[0]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 22.800 ns  ; pwm3[2]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 22.800 ns  ; pwm2[2]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 22.800 ns  ; pwm2[1]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 22.800 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 22.700 ns  ; pwm2[3]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 22.700 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 22.700 ns  ; pwm0[1]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 22.600 ns  ; pwm3[0]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 22.500 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 22.400 ns  ; pwm3[1]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 22.300 ns  ; lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]     ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 22.200 ns  ; pwm3[5]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 22.200 ns  ; pwm2[5]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 22.100 ns  ; pwm0[5]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 22.100 ns  ; pwm0[5]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 22.000 ns  ; pwm2[2]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 21.900 ns  ; pwm0[2]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 21.600 ns  ; pwm3[2]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 21.500 ns  ; pwm0[3]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 21.400 ns  ; pwm2[5]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 21.200 ns  ; pwm1[4]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 21.200 ns  ; pwm1[4]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 21.000 ns  ; pwm1[8]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 21.000 ns  ; pwm3[5]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 21.000 ns  ; pwm1[8]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 20.900 ns  ; pwm0[8]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 20.900 ns  ; pwm0[8]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 20.600 ns  ; pwm1[10]                                                                     ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 20.600 ns  ; pwm1[10]                                                                     ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 20.400 ns  ; pwm0[5]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 20.300 ns  ; pwm3[8]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 20.200 ns  ; pwm3[4]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 20.200 ns  ; pwm2[4]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 20.200 ns  ; pwm1[9]                                                                      ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 20.200 ns  ; pwm0[10]                                                                     ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 20.200 ns  ; pwm1[9]                                                                      ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 20.200 ns  ; pwm0[10]                                                                     ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 20.100 ns  ; pwm2[8]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 20.100 ns  ; pwm0[4]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 20.100 ns  ; pwm0[4]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 19.600 ns  ; pwm3[10]                                                                     ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 19.500 ns  ; pwm3[9]                                                                      ; down[3] ; clk        ;
+; N/A                                     ; None                                                ; 19.400 ns  ; pwm2[10]                                                                     ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 19.400 ns  ; pwm2[4]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 19.300 ns  ; pwm2[8]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 19.200 ns  ; pwm2[9]                                                                      ; down[2] ; clk        ;
+; N/A                                     ; None                                                ; 19.200 ns  ; pwm0[8]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 19.100 ns  ; pwm0[9]                                                                      ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 19.100 ns  ; pwm3[8]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 19.100 ns  ; pwm0[9]                                                                      ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 19.000 ns  ; pwm3[4]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 18.600 ns  ; pwm2[10]                                                                     ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 18.500 ns  ; pwm0[10]                                                                     ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 18.400 ns  ; pwm3[10]                                                                     ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 18.400 ns  ; pwm2[9]                                                                      ; up[2]   ; clk        ;
+; N/A                                     ; None                                                ; 18.400 ns  ; pwm0[4]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 18.300 ns  ; pwm3[9]                                                                      ; up[3]   ; clk        ;
+; N/A                                     ; None                                                ; 17.400 ns  ; pwm0[9]                                                                      ; LED     ; clk        ;
+; N/A                                     ; None                                                ; 14.400 ns  ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[4] ; nConfig ; clk        ;
+; N/A                                     ; None                                                ; 14.200 ns  ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[6] ; nConfig ; clk        ;
+; N/A                                     ; None                                                ; 14.100 ns  ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[3] ; nConfig ; clk        ;
+; N/A                                     ; None                                                ; 14.000 ns  ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[5] ; nConfig ; clk        ;
+; N/A                                     ; None                                                ; 13.300 ns  ; pwm0[15]                                                                     ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 13.300 ns  ; pwm0[15]                                                                     ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 13.200 ns  ; pwm1[15]                                                                     ; down[1] ; clk        ;
+; N/A                                     ; None                                                ; 13.200 ns  ; pwm1[15]                                                                     ; up[1]   ; clk        ;
+; N/A                                     ; None                                                ; 13.100 ns  ; pwm0[13]                                                                     ; down[0] ; clk        ;
+; N/A                                     ; None                                                ; 13.100 ns  ; pwm0[12]                                                                     ; up[0]   ; clk        ;
+; N/A                                     ; None                                                ; 13.000 ns  ; pwm1[13]                                                                     ; down[1] ; clk        ;
+; Timing analysis restricted to 200 rows. ; To change the limit use Settings (Assignments menu) ;            ;                                                                              ;         ;            ;
++-----------------------------------------+-----------------------------------------------------+------------+------------------------------------------------------------------------------+---------+------------+
+
+
++-----------------------------------------------------------------------------------------------------------------------------------------------+
+; th                                                                                                                                            ;
++---------------+-------------+------------+----------+------------------------------------------------------------------------------+----------+
+; Minimum Slack ; Required th ; Actual th  ; From     ; To                                                                           ; To Clock ;
++---------------+-------------+------------+----------+------------------------------------------------------------------------------+----------+
+; N/A           ; None        ; 0.900 ns   ; quadA[1] ; quad:q1|Ad[0]                                                                ; clk      ;
+; N/A           ; None        ; 0.900 ns   ; quadB[1] ; quad:q1|Bd[0]                                                                ; clk      ;
+; N/A           ; None        ; 0.900 ns   ; SCK      ; SCKr[0]                                                                      ; clk      ;
+; N/A           ; None        ; -1.000 ns  ; quadZ[0] ; quad:q0|Zc[1]                                                                ; clk      ;
+; N/A           ; None        ; -1.200 ns  ; quadZ[0] ; quad:q0|Zc[0]                                                                ; clk      ;
+; N/A           ; None        ; -1.200 ns  ; quadZ[0] ; quad:q0|Zc[2]                                                                ; clk      ;
+; N/A           ; None        ; -3.200 ns  ; quadA[3] ; quad:q3|Ad[0]                                                                ; clk      ;
+; N/A           ; None        ; -3.200 ns  ; quadB[3] ; quad:q3|Bd[0]                                                                ; clk      ;
+; N/A           ; None        ; -3.600 ns  ; quadA[2] ; quad:q2|Ad[0]                                                                ; clk      ;
+; N/A           ; None        ; -3.900 ns  ; quadB[2] ; quad:q2|Bd[0]                                                                ; clk      ;
+; N/A           ; None        ; -3.900 ns  ; SSEL     ; SSELr[0]                                                                     ; clk      ;
+; N/A           ; None        ; -4.000 ns  ; MOSI     ; MOSIr[0]                                                                     ; clk      ;
+; N/A           ; None        ; -4.200 ns  ; quadA[0] ; quad:q0|Ad[0]                                                                ; clk      ;
+; N/A           ; None        ; -4.200 ns  ; quadB[0] ; quad:q0|Bd[0]                                                                ; clk      ;
+; N/A           ; None        ; -5.300 ns  ; quadZ[3] ; quad:q3|Zc[1]                                                                ; clk      ;
+; N/A           ; None        ; -5.500 ns  ; quadZ[2] ; quad:q2|Zc[1]                                                                ; clk      ;
+; N/A           ; None        ; -5.500 ns  ; quadZ[3] ; quad:q3|Zc[2]                                                                ; clk      ;
+; N/A           ; None        ; -5.500 ns  ; quadZ[3] ; quad:q3|Zc[0]                                                                ; clk      ;
+; N/A           ; None        ; -5.700 ns  ; quadZ[2] ; quad:q2|Zc[2]                                                                ; clk      ;
+; N/A           ; None        ; -5.700 ns  ; quadZ[2] ; quad:q2|Zc[0]                                                                ; clk      ;
+; N/A           ; None        ; -5.800 ns  ; quadB[1] ; data_buf[5]                                                                  ; clk      ;
+; N/A           ; None        ; -5.800 ns  ; quadZ[1] ; quad:q1|Zc[1]                                                                ; clk      ;
+; N/A           ; None        ; -6.000 ns  ; quadZ[1] ; quad:q1|Zc[0]                                                                ; clk      ;
+; N/A           ; None        ; -6.000 ns  ; quadZ[1] ; quad:q1|Zc[2]                                                                ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[6] ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[5] ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[4] ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[3] ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[2] ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[1] ; clk      ;
+; N/A           ; None        ; -7.300 ns  ; SSEL     ; wdt:w|lpm_counter:timer_rtl_1|alt_counter_f10ke:wysi_counter|counter_cell[0] ; clk      ;
+; N/A           ; None        ; -8.100 ns  ; quadA[1] ; data_buf[1]                                                                  ; clk      ;
+; N/A           ; None        ; -8.200 ns  ; quadZ[0] ; data_buf[0]                                                                  ; clk      ;
+; N/A           ; None        ; -10.300 ns ; din[0]   ; data_buf[0]                                                                  ; clk      ;
+; N/A           ; None        ; -10.700 ns ; din[7]   ; data_buf[7]                                                                  ; clk      ;
+; N/A           ; None        ; -11.000 ns ; din[6]   ; data_buf[6]                                                                  ; clk      ;
+; N/A           ; None        ; -11.100 ns ; quadB[2] ; data_buf[6]                                                                  ; clk      ;
+; N/A           ; None        ; -11.400 ns ; din[1]   ; data_buf[1]                                                                  ; clk      ;
+; N/A           ; None        ; -12.000 ns ; quadB[3] ; data_buf[7]                                                                  ; clk      ;
+; N/A           ; None        ; -12.400 ns ; quadA[0] ; data_buf[0]                                                                  ; clk      ;
+; N/A           ; None        ; -12.600 ns ; din[5]   ; data_buf[5]                                                                  ; clk      ;
+; N/A           ; None        ; -13.000 ns ; quadZ[1] ; data_buf[1]                                                                  ; clk      ;
+; N/A           ; None        ; -13.500 ns ; din[3]   ; data_buf[3]                                                                  ; clk      ;
+; N/A           ; None        ; -13.700 ns ; din[4]   ; data_buf[4]                                                                  ; clk      ;
+; N/A           ; None        ; -13.800 ns ; quadB[0] ; data_buf[4]                                                                  ; clk      ;
+; N/A           ; None        ; -16.200 ns ; quadZ[3] ; data_buf[3]                                                                  ; clk      ;
+; N/A           ; None        ; -16.300 ns ; quadA[3] ; data_buf[3]                                                                  ; clk      ;
+; N/A           ; None        ; -16.800 ns ; quadA[2] ; data_buf[2]                                                                  ; clk      ;
+; N/A           ; None        ; -16.900 ns ; quadZ[2] ; data_buf[2]                                                                  ; clk      ;
+; N/A           ; None        ; -17.500 ns ; din[2]   ; data_buf[2]                                                                  ; clk      ;
++---------------+-------------+------------+----------+------------------------------------------------------------------------------+----------+
+
+
++--------------------------+
+; Timing Analyzer Messages ;
++--------------------------+
+Info: *******************************************************************
+Info: Running Quartus II Classic Timing Analyzer
+    Info: Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+    Info: Processing started: Sat Aug 10 23:18:22 2013
+Info: Command: quartus_tan --read_settings_files=off --write_settings_files=off test-pluto-spi -c pluto-spi
+Info: Started post-fitting delay annotation
+Info: Delay annotation completed successfully
+Warning: Found pins functioning as undefined clocks and/or memory enables
+    Info: Assuming node "clk" is an undefined clock
+Info: Clock "clk" has Internal fmax of 56.82 MHz between source register "lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4]" and destination register "data_buf[4]" (period= 17.6 ns)
+    Info: + Longest register to register delay is 16.500 ns
+        Info: 1: + IC(0.000 ns) + CELL(0.000 ns) = 0.000 ns; Loc. = LC5_B20; Fanout = 18; REG Node = 'lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4]'
+        Info: 2: + IC(1.000 ns) + CELL(1.600 ns) = 2.600 ns; Loc. = LC6_B22; Fanout = 6; COMB Node = 'Equal6~1'
+        Info: 3: + IC(1.200 ns) + CELL(1.600 ns) = 5.400 ns; Loc. = LC2_B21; Fanout = 13; COMB Node = 'Equal6~2'
+        Info: 4: + IC(1.100 ns) + CELL(1.700 ns) = 8.200 ns; Loc. = LC1_B18; Fanout = 9; COMB Node = 'data_buf~191'
+        Info: 5: + IC(1.000 ns) + CELL(1.400 ns) = 10.600 ns; Loc. = LC8_B19; Fanout = 4; COMB Node = 'data_buf~207'
+        Info: 6: + IC(0.300 ns) + CELL(1.600 ns) = 12.500 ns; Loc. = LC7_B19; Fanout = 1; COMB Node = 'data_buf~259'
+        Info: 7: + IC(0.300 ns) + CELL(1.400 ns) = 14.200 ns; Loc. = LC1_B19; Fanout = 1; COMB Node = 'data_buf~260'
+        Info: 8: + IC(1.500 ns) + CELL(0.800 ns) = 16.500 ns; Loc. = LC1_C24; Fanout = 1; REG Node = 'data_buf[4]'
+        Info: Total cell delay = 10.100 ns ( 61.21 % )
+        Info: Total interconnect delay = 6.400 ns ( 38.79 % )
+    Info: - Smallest clock skew is 0.000 ns
+        Info: + Shortest clock path from clock "clk" to destination register is 2.400 ns
+            Info: 1: + IC(0.000 ns) + CELL(2.000 ns) = 2.000 ns; Loc. = PIN_91; Fanout = 276; CLK Node = 'clk'
+            Info: 2: + IC(0.400 ns) + CELL(0.000 ns) = 2.400 ns; Loc. = LC1_C24; Fanout = 1; REG Node = 'data_buf[4]'
+            Info: Total cell delay = 2.000 ns ( 83.33 % )
+            Info: Total interconnect delay = 0.400 ns ( 16.67 % )
+        Info: - Longest clock path from clock "clk" to source register is 2.400 ns
+            Info: 1: + IC(0.000 ns) + CELL(2.000 ns) = 2.000 ns; Loc. = PIN_91; Fanout = 276; CLK Node = 'clk'
+            Info: 2: + IC(0.400 ns) + CELL(0.000 ns) = 2.400 ns; Loc. = LC5_B20; Fanout = 18; REG Node = 'lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4]'
+            Info: Total cell delay = 2.000 ns ( 83.33 % )
+            Info: Total interconnect delay = 0.400 ns ( 16.67 % )
+    Info: + Micro clock to output delay of source is 0.500 ns
+    Info: + Micro setup delay of destination is 0.600 ns
+Info: tsu for register "data_buf[2]" (data pin = "din[2]", clock pin = "clk") is 19.400 ns
+    Info: + Longest pin to register delay is 21.200 ns
+        Info: 1: + IC(0.000 ns) + CELL(4.900 ns) = 4.900 ns; Loc. = PIN_8; Fanout = 1; PIN Node = 'din[2]'
+        Info: 2: + IC(2.700 ns) + CELL(1.700 ns) = 9.300 ns; Loc. = LC4_C20; Fanout = 1; COMB Node = 'data_buf~306'
+        Info: 3: + IC(0.300 ns) + CELL(1.600 ns) = 11.200 ns; Loc. = LC6_C20; Fanout = 1; COMB Node = 'data_buf~308'
+        Info: 4: + IC(0.300 ns) + CELL(1.400 ns) = 12.900 ns; Loc. = LC8_C20; Fanout = 1; COMB Node = 'data_buf~312'
+        Info: 5: + IC(2.200 ns) + CELL(1.400 ns) = 16.500 ns; Loc. = LC3_B12; Fanout = 1; COMB Node = 'data_buf~313'
+        Info: 6: + IC(0.300 ns) + CELL(1.400 ns) = 18.200 ns; Loc. = LC5_B12; Fanout = 1; COMB Node = 'data_buf~314'
+        Info: 7: + IC(0.300 ns) + CELL(1.400 ns) = 19.900 ns; Loc. = LC8_B12; Fanout = 1; COMB Node = 'data_buf~318'
+        Info: 8: + IC(0.300 ns) + CELL(1.000 ns) = 21.200 ns; Loc. = LC1_B12; Fanout = 1; REG Node = 'data_buf[2]'
+        Info: Total cell delay = 14.800 ns ( 69.81 % )
+        Info: Total interconnect delay = 6.400 ns ( 30.19 % )
+    Info: + Micro setup delay of destination is 0.600 ns
+    Info: - Shortest clock path from clock "clk" to destination register is 2.400 ns
+        Info: 1: + IC(0.000 ns) + CELL(2.000 ns) = 2.000 ns; Loc. = PIN_91; Fanout = 276; CLK Node = 'clk'
+        Info: 2: + IC(0.400 ns) + CELL(0.000 ns) = 2.400 ns; Loc. = LC1_B12; Fanout = 1; REG Node = 'data_buf[2]'
+        Info: Total cell delay = 2.000 ns ( 83.33 % )
+        Info: Total interconnect delay = 0.400 ns ( 16.67 % )
+Info: tco from clock "clk" to destination pin "down[1]" through register "pwm0[14]" is 29.300 ns
+    Info: + Longest clock path from clock "clk" to source register is 2.400 ns
+        Info: 1: + IC(0.000 ns) + CELL(2.000 ns) = 2.000 ns; Loc. = PIN_91; Fanout = 276; CLK Node = 'clk'
+        Info: 2: + IC(0.400 ns) + CELL(0.000 ns) = 2.400 ns; Loc. = LC6_A1; Fanout = 17; REG Node = 'pwm0[14]'
+        Info: Total cell delay = 2.000 ns ( 83.33 % )
+        Info: Total interconnect delay = 0.400 ns ( 16.67 % )
+    Info: + Micro clock to output delay of source is 0.500 ns
+    Info: + Longest register to pin delay is 26.400 ns
+        Info: 1: + IC(0.000 ns) + CELL(0.000 ns) = 0.000 ns; Loc. = LC6_A1; Fanout = 17; REG Node = 'pwm0[14]'
+        Info: 2: + IC(1.900 ns) + CELL(1.600 ns) = 3.500 ns; Loc. = LC6_A18; Fanout = 8; COMB Node = 'pwmcmp0[6]~3'
+        Info: 3: + IC(1.000 ns) + CELL(1.600 ns) = 6.100 ns; Loc. = LC1_A20; Fanout = 2; COMB Node = 'LessThan1~19'
+        Info: 4: + IC(0.300 ns) + CELL(1.600 ns) = 8.000 ns; Loc. = LC8_A20; Fanout = 1; COMB Node = 'LessThan1~22'
+        Info: 5: + IC(0.300 ns) + CELL(1.100 ns) = 9.400 ns; Loc. = LC2_A20; Fanout = 1; COMB Node = 'LessThan1~56'
+        Info: 6: + IC(0.000 ns) + CELL(1.600 ns) = 11.000 ns; Loc. = LC3_A20; Fanout = 1; COMB Node = 'LessThan1~37'
+        Info: 7: + IC(1.700 ns) + CELL(0.800 ns) = 13.500 ns; Loc. = LC2_A7; Fanout = 1; COMB Node = 'LessThan1~48'
+        Info: 8: + IC(0.000 ns) + CELL(1.600 ns) = 15.100 ns; Loc. = LC3_A7; Fanout = 2; COMB Node = 'LessThan1~36'
+        Info: 9: + IC(1.300 ns) + CELL(1.600 ns) = 18.000 ns; Loc. = LC7_A5; Fanout = 1; COMB Node = 'real_down[1]'
+        Info: 10: + IC(2.100 ns) + CELL(6.300 ns) = 26.400 ns; Loc. = PIN_23; Fanout = 0; PIN Node = 'down[1]'
+        Info: Total cell delay = 17.800 ns ( 67.42 % )
+        Info: Total interconnect delay = 8.600 ns ( 32.58 % )
+Info: th for register "quad:q1|Ad[0]" (data pin = "quadA[1]", clock pin = "clk") is 0.900 ns
+    Info: + Longest clock path from clock "clk" to destination register is 2.400 ns
+        Info: 1: + IC(0.000 ns) + CELL(2.000 ns) = 2.000 ns; Loc. = PIN_91; Fanout = 276; CLK Node = 'clk'
+        Info: 2: + IC(0.400 ns) + CELL(0.000 ns) = 2.400 ns; Loc. = LC8_B7; Fanout = 1; REG Node = 'quad:q1|Ad[0]'
+        Info: Total cell delay = 2.000 ns ( 83.33 % )
+        Info: Total interconnect delay = 0.400 ns ( 16.67 % )
+    Info: + Micro hold delay of destination is 1.300 ns
+    Info: - Shortest pin to register delay is 2.800 ns
+        Info: 1: + IC(0.000 ns) + CELL(2.000 ns) = 2.000 ns; Loc. = PIN_39; Fanout = 2; PIN Node = 'quadA[1]'
+        Info: 2: + IC(0.000 ns) + CELL(0.800 ns) = 2.800 ns; Loc. = LC8_B7; Fanout = 1; REG Node = 'quad:q1|Ad[0]'
+        Info: Total cell delay = 2.800 ns ( 100.00 % )
+Info: Quartus II Classic Timing Analyzer was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 130 megabytes
+    Info: Processing ended: Sat Aug 10 23:18:23 2013
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:01
+
+
