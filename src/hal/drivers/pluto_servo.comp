@@ -215,11 +215,11 @@ int PWM(int enable, double value, double offset, double scale, double min_dc, do
     if(value > 2047) value = 2047;
 
     if(value < 0) {
-	if(is_pwmdir) {
-	     result = (1<<13) | (int)(-value);
-	} else {
-	     result = (1<<15) | (int)(-value);
-	}
+        if(is_pwmdir) {
+            result = (1<<13) | (int)(-value);
+        } else {
+            result = (1<<15) | (int)(-value);
+        }
     } else result = value;
     if(is_pdm) result |= 1<<14;
     if(dio0) result ^= 1<<12;
@@ -266,7 +266,7 @@ FUNCTION(read) {
 
     for(i=0; i<4; i++) {
         int64_t count, index;
-	int newlow, indlow, indexed;
+        int newlow, indlow, indexed;
         int reset;
         ppdata = read32();
         reset = encoder_reset(i);
@@ -274,20 +274,20 @@ FUNCTION(read) {
             int status = inb(ioaddr+1) & 1;
             if(status) {
                 communication_error ++;
-		pluto_clear_error_register();
+                pluto_clear_error_register();
             }
             if(communication_error) { EPP_DIR_WRITE(); return; }
         }
 
-	newlow = ppdata & MASK;
-	indlow = (ppdata >> W) & MASK;
-	indexed = ppdata & (1<<(2*W));
+        newlow = ppdata & MASK;
+        indlow = (ppdata >> W) & MASK;
+        indexed = ppdata & (1<<(2*W));
 
         count = extend(data.last_count[i], newlow, W);
-	if(indexed)
-	    index = extend(count, indlow, W);
-	else
-	    index = data.last_index[i];
+        if(indexed)
+            index = extend(count, indlow, W);
+        else
+            index = data.last_index[i];
 
         if(encoder_index_enable(i) && indexed) {
             encoder_index_enable(i) = 0;

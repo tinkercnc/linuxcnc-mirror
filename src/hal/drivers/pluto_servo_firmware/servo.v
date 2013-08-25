@@ -1,5 +1,5 @@
 //    This is a component of pluto_servo, a PWM servo driver and quadrature
-//    counter for emc2
+//    counter for linuxcnc
 //    Copyright 2006 Jeff Epler <jepler@unpythonic.net>
 //
 //    This program is free software; you can redistribute it and/or modify
@@ -16,23 +16,48 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-module pluto_servo(clk, led, nConfig, epp_nReset, pport_data, nWrite, nWait, nDataStr,
-	nAddrStr, dout, din, quadA, quadB, quadZ, up, down);
+//**********************************************************************
+// Open-Drain/Collector buffer
+module OC_Buff(in, out);
+input in;
+output out;
+assign out = in ? 1'bz : 1'b0;
+endmodule
+
+//**********************************************************************
+module pluto_servo(clk, led, nConfig, epp_nReset, pport_data, nWrite, nWait, nACK, nPE, nDataStr,
+    nAddrStr, dout, din, quadA, quadB, quadZ, up, down);
 parameter QW=14;
 input clk;
 output led, nConfig;
 inout [7:0] pport_data;
 input nWrite;
-output nWait;
+output nWait, nACK, nPE;
 input nDataStr, nAddrStr, epp_nReset;
 wire do_tristate;
-reg[9:0] real_dout; output [9:0] dout = do_tristate ? 10'bZZZZZZZZZZ : real_dout; 
+assign nACK = 1'b0;
+assign nPE = 1'b0;
+//assign nConfig = 1'b1;
+
+reg[9:0] real_dout; 
+//output [9:0] dout = real_dout[9:0] ? 10'bZZZZZZZZZZ : 10'b0000000000 ;
+output [9:0] dout = 10'bZZZZZZZZZZ;
+//assign dout = real_dout;
+OC_Buff ocout[9:0](real_dout, dout);
+
 input [7:0] din;
 input [3:0] quadA;
 input [3:0] quadB;
 input [3:0] quadZ;
-wire[3:0] real_up; output [3:0] up = do_tristate ? 4'bZZZZ : real_up;
-wire[3:0] real_down; output [3:0] down = do_tristate ? 4'bZZZZ : real_down;
+
+wire[3:0] real_up;
+output [3:0] up = 4'bZZZZ;
+OC_Buff ocup[3:0](real_up, up);
+
+wire[3:0] real_down;
+output [3:0] down = 4'bZZZZ;
+OC_Buff ocdown[3:0](real_down, down);
+
 reg Zpolarity;
 
 wire [2*QW:0] quad0, quad1, quad2, quad3;
@@ -41,10 +66,11 @@ wire do_enable_wdt;
 wire pwm_at_top;
 wdt w(clk, do_enable_wdt, pwm_at_top, do_tristate);
 
+//**********************************************************************
 // PWM stuff
 // PWM clock is about 20kHz for clk @ 40MHz, 11-bit cnt
 reg [10:0] pwmcnt;
-wire [10:0] top = 11'd2046;
+wire [10:0] top = 11'd2047;
 assign pwm_at_top = (pwmcnt == top);
 reg [15:0] pwm0, pwm1, pwm2, pwm3;
 always @(posedge clk) begin
@@ -55,7 +81,7 @@ end
 wire [10:0] pwmrev = { 
     pwmcnt[4], pwmcnt[5], pwmcnt[6], pwmcnt[7], pwmcnt[8], pwmcnt[9],
     pwmcnt[10], pwmcnt[3:0]};
-wire [10:0] pwmcmp0 = pwm0[14] ? pwmrev : pwmcnt;
+wire [10:0] pwmcmp0 = pwm0[14] ? pwmrev : pwmcnt;   // pwm0[14] = pdm/pwm bit
 // wire [10:0] pwmcmp1 = pwm1[14] ? pwmrev : pwmcnt;
 // wire [10:0] pwmcmp2 = pwm2[14] ? pwmrev : pwmcnt;
 // wire [10:0] pwmcmp3 = pwm3[14] ? pwmrev : pwmcnt;
@@ -72,44 +98,75 @@ assign real_down[1] = pwm1[13] ^ (~pwm1[15] ? 1'd0 : pwmact1);
 assign real_down[2] = pwm2[13] ^ (~pwm2[15] ? 1'd0 : pwmact2);
 assign real_down[3] = pwm3[13] ^ (~pwm3[15] ? 1'd0 : pwmact3);
 
+//**********************************************************************
 // Quadrature stuff
 // Quadrature is digitized at 40MHz into 14-bit counters
 // Read up to 2^13 pulses / polling period = 8MHz for 1kHz servo period
 reg qtest;
 wire qr0, qr1, qr2, qr3;
-quad q0(clk, qtest ? real_dout[0] : quadA[0], qtest ? real_dout[1] : quadB[0], qtest ? real_dout[2] : quadZ[0]^Zpolarity, qr0, quad0);
+//quad q0(clk, qtest ? real_dout[0] : quadA[0], qtest ? real_dout[1] : quadB[0], qtest ? real_dout[2] : quadZ[0]^Zpolarity, qr0, quad0);
+quad q0(clk, quadA[0], quadB[0], quadZ[0]^Zpolarity, qr0, quad0);
 quad q1(clk, quadA[1], quadB[1], quadZ[1]^Zpolarity, qr1, quad1);
 quad q2(clk, quadA[2], quadB[2], quadZ[2]^Zpolarity, qr2, quad2);
 quad q3(clk, quadA[3], quadB[3], quadZ[3]^Zpolarity, qr3, quad3);
 
+//**********************************************************************
 // EPP stuff
-wire EPP_write = ~nWrite;
-wire EPP_read = nWrite;
+reg [2:0] EPP_nWrite_reg;
+always @(posedge clk) EPP_nWrite_reg <= {EPP_nWrite_reg[1:0], nWrite};
+wire EPP_write = ~EPP_nWrite_reg[1];
+wire EPP_read = EPP_nWrite_reg[1];
+//wire EPP_write = ~nWrite;
+//wire EPP_read = nWrite;
+
 wire EPP_addr_strobe = ~nAddrStr;
 wire EPP_data_strobe = ~nDataStr;
 wire EPP_strobe = EPP_data_strobe | EPP_addr_strobe;
 
-wire EPP_wait; assign nWait = ~EPP_wait;
+wire EPP_wait;
+assign nWait = ~EPP_wait;
 wire [7:0] EPP_datain = pport_data;
-wire [7:0] EPP_dataout; assign pport_data = EPP_dataout;
+wire [7:0] EPP_dataout;
+assign pport_data = EPP_dataout;
 
 reg [4:0] EPP_strobe_reg;
 always @(posedge clk) EPP_strobe_reg <= {EPP_strobe_reg[3:0], EPP_strobe};
-wire EPP_strobe_edge1 = (EPP_strobe_reg[2:1]==2'b01);
+//wire EPP_strobe_edge1 = (EPP_strobe_reg[2:1]==2'b01);
 
-// reg led;
+// the first part of the "right way" (see below @ addr_reg test)
+reg [2:0] EPP_dstrobe_reg;
+always @(posedge clk) EPP_dstrobe_reg <= {EPP_dstrobe_reg[1:0], EPP_data_strobe};
+wire EPP_dstrobe_reg_nedge = (EPP_dstrobe_reg[2:1]==2'b10);
+wire EPP_dstrobe_reg_pedge = (EPP_dstrobe_reg[2:1]==2'b01);
+reg [2:0] EPP_astrobe_reg;
+always @(posedge clk) EPP_astrobe_reg <= {EPP_astrobe_reg[1:0], EPP_addr_strobe};
+wire EPP_astrobe_reg_nedge = (EPP_astrobe_reg[2:1]==2'b10);
+wire EPP_astrobe_reg_pedge = (EPP_astrobe_reg[2:1]==2'b01);
 
-assign EPP_wait = EPP_strobe_reg[4];
+assign EPP_wait = EPP_strobe_reg[2];
 reg[4:0] addr_reg;
 reg[7:0] lowbyte;
 
-always @(posedge clk)
-    if(EPP_strobe_edge1 & EPP_write & EPP_addr_strobe) begin
+always @(posedge clk) begin
+    //if(EPP_strobe_edge1 & EPP_write & EPP_addr_strobe) begin
+    if(EPP_write & EPP_astrobe_reg_pedge) begin
         addr_reg <= EPP_datain[4:0];
     end
-    else if(EPP_strobe_edge1 & !EPP_addr_strobe) addr_reg <= addr_reg + 4'd1;
+    /*
+    else if(EPP_strobe_edge1 & !EPP_addr_strobe) begin
+        addr_reg <= addr_reg + 4'd1;
+    end
+    */
+    // the second part of the "right way"
+    //else if(EPP_dstrobe_reg_nedge & !EPP_addr_strobe) begin
+    else if(EPP_dstrobe_reg_nedge) begin
+        addr_reg <= addr_reg + 4'd1;
+    end
+    
+end
 always @(posedge clk) begin
-    if(EPP_strobe_edge1 & EPP_write & EPP_data_strobe) begin
+    //if(EPP_strobe_edge1 & EPP_write & EPP_data_strobe) begin
+    if(EPP_dstrobe_reg_pedge & EPP_write) begin
         if(addr_reg[3:0] == 4'd1)      pwm0 <= { EPP_datain, lowbyte };
         else if(addr_reg[3:0] == 4'd3) pwm1 <= { EPP_datain, lowbyte };
         else if(addr_reg[3:0] == 4'd5) pwm2 <= { EPP_datain, lowbyte };
@@ -126,7 +183,8 @@ end
 reg [31:0] data_buf;
 
 always @(posedge clk) begin
-    if(EPP_strobe_edge1 & EPP_read && addr_reg[1:0] == 2'd0) begin
+    //if(EPP_strobe_edge1 & EPP_read && addr_reg[1:0] == 2'd0) begin
+    if(EPP_dstrobe_reg_pedge & EPP_read && addr_reg[1:0] == 2'd0) begin
         if(addr_reg[4:2] == 3'd0) data_buf <= quad0;
         else if(addr_reg[4:2] == 3'd1) data_buf <= quad1;
         else if(addr_reg[4:2] == 3'd2) data_buf <= quad2;
@@ -139,18 +197,36 @@ end
 // the addr_reg test looks funny because it is auto-incremented in an always
 // block so "1" reads the low byte, "2 and "3" read middle bytes, and "0"
 // reads the high byte I have a feeling that I'm doing this in the wrong way.
+/*
 wire [7:0] data_reg = addr_reg[1:0] == 2'd1 ? data_buf[7:0] :
                          (addr_reg[1:0] == 2'd2 ? data_buf[15:8] :
                          (addr_reg[1:0] == 2'd3 ? data_buf[23:16] :
                          data_buf[31:24]));
 
+ */                        
+ // yes, it was the wrong way.
+ // here is the right one. ;)
+ // the third part of the "right way"
+wire [7:0] data_reg = addr_reg[1:0] == 2'd0 ? data_buf[7:0] :
+                         (addr_reg[1:0] == 2'd1 ? data_buf[15:8] :
+                         (addr_reg[1:0] == 2'd2 ? data_buf[23:16] :
+                         data_buf[31:24]));
+
+
 wire [7:0] EPP_data_mux = data_reg;
 assign EPP_dataout = (EPP_read & EPP_wait) ? EPP_data_mux : 8'hZZ;
-assign do_enable_wdt = EPP_strobe_edge1 & EPP_write & EPP_data_strobe & (addr_reg[3:0] == 4'd9) & EPP_datain[6];
-assign qr0 = EPP_strobe_edge1 & EPP_read & EPP_data_strobe & (addr_reg[4:2] == 3'd0);
+//assign do_enable_wdt = EPP_strobe_edge1 & EPP_write & EPP_data_strobe & (addr_reg[3:0] == 4'd9) & EPP_datain[6];
+assign do_enable_wdt = EPP_dstrobe_reg_pedge & EPP_write & (addr_reg[3:0] == 4'd9) & EPP_datain[6];
+/*assign qr0 = EPP_strobe_edge1 & EPP_read & EPP_data_strobe & (addr_reg[4:2] == 3'd0);
 assign qr1 = EPP_strobe_edge1 & EPP_read & EPP_data_strobe & (addr_reg[4:2] == 3'd1);
 assign qr2 = EPP_strobe_edge1 & EPP_read & EPP_data_strobe & (addr_reg[4:2] == 3'd2);
-assign qr3 = EPP_strobe_edge1 & EPP_read & EPP_data_strobe & (addr_reg[4:2] == 3'd3);
+assign qr3 = EPP_strobe_edge1 & EPP_read & EPP_data_strobe & (addr_reg[4:2] == 3'd3); */
+assign qr0 = EPP_dstrobe_reg_pedge & EPP_read & (addr_reg[4:2] == 3'd0);
+assign qr1 = EPP_dstrobe_reg_pedge & EPP_read & (addr_reg[4:2] == 3'd1);
+assign qr2 = EPP_dstrobe_reg_pedge & EPP_read & (addr_reg[4:2] == 3'd2);
+assign qr3 = EPP_dstrobe_reg_pedge & EPP_read & (addr_reg[4:2] == 3'd3);
+
 assign led = do_tristate ? 1'BZ : (real_up[0] ^ real_down[0]);
+//assign led = do_tristate ? 1'BZ : (dout[3]); // schau ma mal, ob der fehler auch bei der pluto-led zu sehn is...
 assign nConfig = epp_nReset; // 1'b1;
 endmodule

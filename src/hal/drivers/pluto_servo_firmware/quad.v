@@ -1,5 +1,5 @@
 //    This is a component of pluto_servo, a PWM servo driver and quadrature
-//    counter for emc2
+//    counter for linuxcnc
 //    Copyright 2006 Jeff Epler <jepler@unpythonic.net>
 //
 //    This program is free software; you can redistribute it and/or modify

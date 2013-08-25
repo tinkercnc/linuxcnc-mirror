@@ -51,10 +51,10 @@ static inline int64_t extend(int64_t old, int newlow, int nbits) {
     if(oldlow < newlow) candidate2 = candidate1 - (1<<nbits);
     else                candidate2 = candidate1 + (1<<nbits);
 
-    if (llabs(old-candidate1) > maxdelta)
-	return candidate2;
-    else
-	return candidate1;
+    if (llabs(old-candidate1) > maxdelta) {
+        return candidate2;
+    }else
+        return candidate1;
 }
 
 static inline void EPP_DIR_WRITE(void) { }
@@ -76,7 +76,7 @@ static inline __u32 read32(void) {
     unsigned char a, b, c, d;
 
     if(epp_wide)
-	return inl(ioaddr+4);
+        return inl(ioaddr+4);
 
     a = EPP_READ();
     b = EPP_READ();
@@ -88,8 +88,8 @@ static inline __u32 read32(void) {
 
 static inline void write32(long w) {
     if(epp_wide) {
-	outl(w, ioaddr+4);
-	return;
+        outl(w, ioaddr+4);
+        return;
     }
 
     EPP_WRITE(w);
@@ -115,7 +115,7 @@ static void pluto_program(unsigned char firmware[FIRMWARE_SIZE]) {
     int i;
     rtapi_print_msg(RTAPI_MSG_INFO, "uploading firmware\n");
 
-    // pull the reset low -- bit 2 of status register
+    // pull the reset low -- bit 2 of Control register
     // keep it low 2 microseconds
     for(i=0; i<4; i++) outb(0, ioaddr+2);
 
@@ -125,13 +125,13 @@ static void pluto_program(unsigned char firmware[FIRMWARE_SIZE]) {
 
     // Now program the device...
     for(byte = 0; byte < FIRMWARE_SIZE; byte++) {
-	for(bit = 0; bit < 8; bit++) {
-	    int v = firmware[byte] & (1<<bit);
-	    if(v) outb(0xff, ioaddr); else outb(0, ioaddr);
-	    outb(0|4, ioaddr+2);
-	    outb(1|4, ioaddr+2);
-	    outb(0|4, ioaddr+2);
-	}
+        for(bit = 0; bit < 8; bit++) {
+            int v = firmware[byte] & (1<<bit);
+            if(v) outb(0xff, ioaddr); else outb(0, ioaddr);
+            outb(0|4, ioaddr+2);
+            outb(1|4, ioaddr+2);
+            outb(0|4, ioaddr+2);
+        }
     }
     rtapi_print_msg(RTAPI_MSG_INFO, "done\n");
 }
