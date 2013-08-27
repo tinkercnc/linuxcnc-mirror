@@ -1,6 +1,6 @@
 compiling neu pluto-servo driver:
 
-copy neu firmware file
+copy new firmware file
     pluto_servo.rbf
 to
     <linuxcnc-src>/src/hal/drivers/pluto_servo_firmware/
