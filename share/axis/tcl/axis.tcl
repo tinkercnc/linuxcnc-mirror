@@ -1530,7 +1530,7 @@ label .info.tool \
 	-anchor w \
 	-borderwidth 2 \
 	-relief sunken \
-	-textvariable tool 
+	-textvariable tool
 # -width 30
 
 label .info.offset \
