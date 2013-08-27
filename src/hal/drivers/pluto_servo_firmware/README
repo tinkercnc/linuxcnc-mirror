@@ -1,0 +1,18 @@
+compiling neu pluto-servo driver:
+
+copy neu firmware file
+    pluto_servo.rbf
+to
+    <linuxcnc-src>/src/hal/drivers/pluto_servo_firmware/
+.
+
+then in <linuxcnc-src>/src
+    make
+    sudo make setuid
+.
+
+copy
+    sudo cp <linuxcnc-src>/rtlib/pluto_servo.ko /usr/realtime-2.6.32-122-rtai/modules/linuxcnc
+
+that's it.
+
