@@ -1,6 +1,6 @@
 Wire Diagram:
 
-RPi Connector	|	PPORT
+RPi Connector	|	PPORT @ pluto-p board
 -------------------------------------------
 MOSI 19			| Data0    2	
 MISO 21			| Data1    3
