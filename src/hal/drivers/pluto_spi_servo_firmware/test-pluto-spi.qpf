@@ -18,13 +18,14 @@
 #
 # Quartus II
 # Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
-# Date created = 22:18:08  July 15, 2013
+# Date created = 00:24:03  January 21, 2014
 #
 # -------------------------------------------------------------------------- #
 
 QUARTUS_VERSION = "9.0"
-DATE = "22:18:08  July 15, 2013"
+DATE = "00:24:03  January 21, 2014"
 
 # Revisions
 
 PROJECT_REVISION = "pluto-spi"
+PROJECT_REVISION = "pluto-spi-bbb"

@@ -1,5 +1,5 @@
 Assembler report for pluto-spi
-Sat Aug 10 23:18:20 2013
+Thu Jan 23 14:13:11 2014
 Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
 
 
@@ -10,9 +10,9 @@ Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
   2. Assembler Summary
   3. Assembler Settings
   4. Assembler Generated Files
-  5. Assembler Device Options: //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.sof
-  6. Assembler Device Options: //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.pof
-  7. Assembler Device Options: //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.rbf
+  5. Assembler Device Options: //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.sof
+  6. Assembler Device Options: //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.pof
+  7. Assembler Device Options: //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.rbf
   8. Assembler Messages
 
 
@@ -39,9 +39,9 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Sat Aug 10 23:18:20 2013 ;
+; Assembler Status      ; Successful - Thu Jan 23 14:13:11 2014 ;
 ; Revision Name         ; pluto-spi                             ;
-; Top-level Entity Name ; pluto_test_spi                        ;
+; Top-level Entity Name ; pluto_spi_rspi                        ;
 ; Family                ; ACEX1K                                ;
 ; Device                ; EP1K10TC100-3                         ;
 +-----------------------+---------------------------------------+
@@ -78,48 +78,48 @@ applicable agreement for further details.
 +-----------------------------------------------------------------------------+----------+---------------+
 
 
-+---------------------------------------------------------+
-; Assembler Generated Files                               ;
-+---------------------------------------------------------+
-; File Name                                               ;
-+---------------------------------------------------------+
-; //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.sof ;
-; //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.pof ;
-; //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.rbf ;
-+---------------------------------------------------------+
++----------------------------------------------------------------------------------------------------------------------------------------+
+; Assembler Generated Files                                                                                                              ;
++----------------------------------------------------------------------------------------------------------------------------------------+
+; File Name                                                                                                                              ;
++----------------------------------------------------------------------------------------------------------------------------------------+
+; //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.sof ;
+; //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.pof ;
+; //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.rbf ;
++----------------------------------------------------------------------------------------------------------------------------------------+
 
 
-+-----------------------------------------------------------------------------------+
-; Assembler Device Options: //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.sof ;
-+----------------+------------------------------------------------------------------+
-; Option         ; Setting                                                          ;
-+----------------+------------------------------------------------------------------+
-; Device         ; EP1K10TC100-3                                                    ;
-; JTAG usercode  ; 0x0000007F                                                       ;
-; Checksum       ; 0x0005A307                                                       ;
-+----------------+------------------------------------------------------------------+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.sof ;
++----------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+; Option         ; Setting                                                                                                                                         ;
++----------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+; Device         ; EP1K10TC100-3                                                                                                                                   ;
+; JTAG usercode  ; 0x0000007F                                                                                                                                      ;
+; Checksum       ; 0x00055116                                                                                                                                      ;
++----------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-+-----------------------------------------------------------------------------------+
-; Assembler Device Options: //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.pof ;
-+--------------------+--------------------------------------------------------------+
-; Option             ; Setting                                                      ;
-+--------------------+--------------------------------------------------------------+
-; Device             ; EPC2                                                         ;
-; JTAG usercode      ; 0x00000000                                                   ;
-; Checksum           ; 0x02F2CCC1                                                   ;
-; Compression Ratio  ; 1                                                            ;
-+--------------------+--------------------------------------------------------------+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.pof ;
++--------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
+; Option             ; Setting                                                                                                                                     ;
++--------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
+; Device             ; EPC2                                                                                                                                        ;
+; JTAG usercode      ; 0x00000000                                                                                                                                  ;
+; Checksum           ; 0x02F25EAC                                                                                                                                  ;
+; Compression Ratio  ; 1                                                                                                                                           ;
++--------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-+-----------------------------------------------------------------------------------+
-; Assembler Device Options: //GAUNER/matsche/src/fpga/altera/spi/test/pluto-spi.rbf ;
-+---------------------+-------------------------------------------------------------+
-; Option              ; Setting                                                     ;
-+---------------------+-------------------------------------------------------------+
-; Raw Binary File     ;                                                             ;
-;  Compression Ratio  ; 1                                                           ;
-+---------------------+-------------------------------------------------------------+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: //Gauner/matsche/src/CAM-CNC-usw/linuxcnc/tinkercnc/linuxcnc-mirror/src/hal/drivers/RaspberryPi/pluto_spi_servo_firmware/pluto-spi.rbf ;
++---------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+; Option              ; Setting                                                                                                                                    ;
++---------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+; Raw Binary File     ;                                                                                                                                            ;
+;  Compression Ratio  ; 1                                                                                                                                          ;
++---------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 +--------------------+
@@ -128,13 +128,13 @@ applicable agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus II Assembler
     Info: Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
-    Info: Processing started: Sat Aug 10 23:18:19 2013
+    Info: Processing started: Thu Jan 23 14:13:09 2014
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off test-pluto-spi -c pluto-spi
 Info: Assembler is generating device programming files
 Info: Quartus II Assembler was successful. 0 errors, 0 warnings
     Info: Peak virtual memory: 145 megabytes
-    Info: Processing ended: Sat Aug 10 23:18:20 2013
-    Info: Elapsed time: 00:00:01
+    Info: Processing ended: Thu Jan 23 14:13:11 2014
+    Info: Elapsed time: 00:00:02
     Info: Total CPU time (on all processors): 00:00:01
 
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <LOG_ROOT>
 	<PROJECT NAME="pluto-spi">
+		<CBX_INST_ENTRY INSTANCE_NAME="|pluto_spi_rspi|lpm_add_sub:Add2" CBX_FILE_NAME="add_sub_llh.tdf"/>
 	</PROJECT>
 </LOG_ROOT>

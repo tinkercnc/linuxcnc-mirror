@@ -1,11 +1,12 @@
-|pluto_test_spi
-clk => clk~0.IN5
+|pluto_spi_rspi
+clk => clk~0.IN4
 SCK => SCKr[0].DATAIN
-MOSI => MOSIr[0].DATAIN
+MOSI => data_recvd~7.DATAB
 MISO <= data_sent[7].DB_MAX_OUTPUT_PORT_TYPE
-SSEL => SSEL~0.IN1
+SSEL => SSELr[0].DATAIN
 LED <= LED~0.DB_MAX_OUTPUT_PORT_TYPE
-nConfig <= wdt:w.port3
+nConfig <= nRESET.DB_MAX_OUTPUT_PORT_TYPE
+nRESET => nConfig.DATAIN
 nPE <= <VCC>
 quadA[0] => quadA[0]~3.IN1
 quadA[1] => quadA[1]~2.IN1
@@ -15,13 +16,13 @@ quadB[0] => quadB[0]~3.IN1
 quadB[1] => quadB[1]~2.IN1
 quadB[2] => quadB[2]~1.IN1
 quadB[3] => quadB[3]~0.IN1
-quadZ[0] => data_buf~15.DATAB
+quadZ[0] => data_outbuf~17.DATAB
 quadZ[0] => comb~0.IN1
-quadZ[1] => data_buf~14.DATAB
+quadZ[1] => data_outbuf~16.DATAB
 quadZ[1] => comb~1.IN1
-quadZ[2] => data_buf~13.DATAB
+quadZ[2] => data_outbuf~15.DATAB
 quadZ[2] => comb~2.IN1
-quadZ[3] => data_buf~12.DATAB
+quadZ[3] => data_outbuf~14.DATAB
 quadZ[3] => comb~3.IN1
 up[0] <= up[0]~8.DB_MAX_OUTPUT_PORT_TYPE
 up[1] <= up[1]~7.DB_MAX_OUTPUT_PORT_TYPE
@@ -41,128 +42,107 @@ dout[6] <= dout[6]~13.DB_MAX_OUTPUT_PORT_TYPE
 dout[7] <= dout[7]~12.DB_MAX_OUTPUT_PORT_TYPE
 dout[8] <= dout[8]~11.DB_MAX_OUTPUT_PORT_TYPE
 dout[9] <= dout[9]~10.DB_MAX_OUTPUT_PORT_TYPE
-din[0] => data_buf~7.DATAB
-din[1] => data_buf~6.DATAB
-din[2] => data_buf~5.DATAB
-din[3] => data_buf~4.DATAB
-din[4] => data_buf~3.DATAB
-din[5] => data_buf~2.DATAB
-din[6] => data_buf~1.DATAB
-din[7] => data_buf~0.DATAB
+din[0] => data_outbuf~25.DATAB
+din[1] => data_outbuf~24.DATAB
+din[2] => data_outbuf~23.DATAB
+din[3] => data_outbuf~22.DATAB
+din[4] => data_outbuf~21.DATAB
+din[5] => data_outbuf~20.DATAB
+din[6] => data_outbuf~19.DATAB
+din[7] => data_outbuf~18.DATAB
 
 
-|pluto_test_spi|OC_Buff:ocout[0]
+|pluto_spi_rspi|OC_Buff:ocout[0]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[1]
+|pluto_spi_rspi|OC_Buff:ocout[1]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[2]
+|pluto_spi_rspi|OC_Buff:ocout[2]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[3]
+|pluto_spi_rspi|OC_Buff:ocout[3]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[4]
+|pluto_spi_rspi|OC_Buff:ocout[4]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[5]
+|pluto_spi_rspi|OC_Buff:ocout[5]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[6]
+|pluto_spi_rspi|OC_Buff:ocout[6]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[7]
+|pluto_spi_rspi|OC_Buff:ocout[7]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[8]
+|pluto_spi_rspi|OC_Buff:ocout[8]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocout[9]
+|pluto_spi_rspi|OC_Buff:ocout[9]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocdown[0]
+|pluto_spi_rspi|OC_Buff:ocdown[0]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocdown[1]
+|pluto_spi_rspi|OC_Buff:ocdown[1]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocdown[2]
+|pluto_spi_rspi|OC_Buff:ocdown[2]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocdown[3]
+|pluto_spi_rspi|OC_Buff:ocdown[3]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocup[0]
+|pluto_spi_rspi|OC_Buff:ocup[0]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocup[1]
+|pluto_spi_rspi|OC_Buff:ocup[1]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocup[2]
+|pluto_spi_rspi|OC_Buff:ocup[2]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|OC_Buff:ocup[3]
+|pluto_spi_rspi|OC_Buff:ocup[3]
 in => out~0.OE
 out <= out~0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|wdt:w
-clk => internal_enable.CLK
-clk => timer[6].CLK
-clk => timer[5].CLK
-clk => timer[4].CLK
-clk => timer[3].CLK
-clk => timer[2].CLK
-clk => timer[1].CLK
-clk => timer[0].CLK
-ena => timer~13.OUTPUTSELECT
-ena => timer~12.OUTPUTSELECT
-ena => timer~11.OUTPUTSELECT
-ena => timer~10.OUTPUTSELECT
-ena => timer~9.OUTPUTSELECT
-ena => timer~8.OUTPUTSELECT
-ena => timer~7.OUTPUTSELECT
-ena => internal_enable.ENA
-cnt => always0~0.IN1
-out <= comb~0.DB_MAX_OUTPUT_PORT_TYPE
-
-
-|pluto_test_spi|quad:q0
+|pluto_spi_rspi|quad:q0
 clk => Ad[2].CLK
 clk => Ad[1].CLK
 clk => Ad[0].CLK
@@ -237,7 +217,7 @@ out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
 out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|quad:q1
+|pluto_spi_rspi|quad:q1
 clk => Ad[2].CLK
 clk => Ad[1].CLK
 clk => Ad[0].CLK
@@ -312,7 +292,7 @@ out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
 out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|quad:q2
+|pluto_spi_rspi|quad:q2
 clk => Ad[2].CLK
 clk => Ad[1].CLK
 clk => Ad[0].CLK
@@ -387,7 +367,7 @@ out[27] <= i[13].DB_MAX_OUTPUT_PORT_TYPE
 out[28] <= zl.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|pluto_test_spi|quad:q3
+|pluto_spi_rspi|quad:q3
 clk => Ad[2].CLK
 clk => Ad[1].CLK
 clk => Ad[0].CLK

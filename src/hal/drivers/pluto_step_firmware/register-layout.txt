@@ -40,9 +40,9 @@ Address		Bits	Interpretation
 6..7		0..11	Stepgen 3 velocity in +-.10 fixed-point notation
 8..9		0..13	Digital outputs 0..13
 10..11		0..3	Step time in units of 1600ns
-		8..11	Direction setup/hold time in units of 1600ns
-		14	write 1 to enable watchdog and reset WDT
-		15	step polarity for stepgen 0..3
+8..11		Direction setup/hold time in units of 1600ns
+	14		write 1 to enable watchdog and reset WDT
+	15		step polarity for stepgen 0..3
 
 
 

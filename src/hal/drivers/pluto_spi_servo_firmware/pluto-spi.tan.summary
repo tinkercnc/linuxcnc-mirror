@@ -5,9 +5,9 @@ Timing Analyzer Summary
 Type           : Worst-case tsu
 Slack          : N/A
 Required Time  : None
-Actual Time    : 19.400 ns
-From           : din[2]
-To             : data_buf[2]
+Actual Time    : 17.600 ns
+From           : din[4]
+To             : data_outbuf[4]
 From Clock     : --
 To Clock       : clk
 Failed Paths   : 0
@@ -15,17 +15,27 @@ Failed Paths   : 0
 Type           : Worst-case tco
 Slack          : N/A
 Required Time  : None
-Actual Time    : 29.300 ns
-From           : pwm0[14]
-To             : up[1]
+Actual Time    : 29.500 ns
+From           : lpm_counter:pwmcnt_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]
+To             : down[2]
 From Clock     : clk
+To Clock       : --
+Failed Paths   : 0
+
+Type           : Worst-case tpd
+Slack          : N/A
+Required Time  : None
+Actual Time    : 14.900 ns
+From           : nRESET
+To             : nConfig
+From Clock     : --
 To Clock       : --
 Failed Paths   : 0
 
 Type           : Worst-case th
 Slack          : N/A
 Required Time  : None
-Actual Time    : 0.900 ns
+Actual Time    : 0.700 ns
 From           : SCK
 To             : SCKr[0]
 From Clock     : --
@@ -35,9 +45,9 @@ Failed Paths   : 0
 Type           : Clock Setup: 'clk'
 Slack          : N/A
 Required Time  : None
-Actual Time    : 56.82 MHz ( period = 17.600 ns )
-From           : lpm_counter:spibytecnt_rtl_2|alt_counter_f10ke:wysi_counter|counter_cell[4]
-To             : data_buf[4]
+Actual Time    : 59.88 MHz ( period = 16.700 ns )
+From           : spibytecnt[1]
+To             : data_outbuf[0]
 From Clock     : clk
 To Clock       : clk
 Failed Paths   : 0
