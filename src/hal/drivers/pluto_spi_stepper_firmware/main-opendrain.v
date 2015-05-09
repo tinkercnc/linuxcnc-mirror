@@ -14,8 +14,15 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//**********************************************************************
+// Open-Drain buffer
+module OC_Buff(in, out);
+input in;
+output out;
+assign out = in ? 1'bz : 1'b0;
+endmodule
 
-module main(clk, led, nConfig, epp_nReset, pport_data, nWrite, nWait, nDataStr,
+module main_opendrain(clk, led, nConfig, epp_nReset, pport_data, nWrite, nWait, nDataStr,
 	nAddrStr, dout, din, step, dir);
 parameter W=10;
 parameter F=11;
@@ -30,9 +37,20 @@ input nDataStr, nAddrStr, epp_nReset;
 input [15:0] din;
 
 reg Spolarity;
-reg[13:0] real_dout; output [13:0] dout = do_tristate ? 14'bZ : real_dout; 
-wire[3:0] real_step; output [3:0] step = do_tristate ? 4'bZ : real_step ^ {4{Spolarity}};
-wire[3:0] real_dir; output [3:0] dir = do_tristate ? 4'bZ : real_dir;
+//reg[13:0] real_dout; output [13:0] dout = do_tristate ? 14'bZ : real_dout;
+reg[13:0] real_dout;
+output [13:0] dout = 14'bZ;
+OC_Buff ocout[13:0](real_dout, dout);
+
+//wire[3:0] real_step; output [3:0] step = do_tristate ? 4'bZ : real_step ^ {4{Spolarity}};
+wire[3:0] real_step;
+output [3:0] step = 4'bZ;
+OC_Buff ocstep[3:0](real_step ^ {4{Spolarity}}, step);
+
+//wire[3:0] real_dir; output [3:0] dir = do_tristate ? 4'bZ : real_dir;
+wire[3:0] real_dir;
+output [3:0] dir = 4'bZ;
+OC_Buff ocdir[3:0](real_dir, dir);
 
 wire [W+F-1:0] pos0, pos1, pos2, pos3;
 reg  [F:0]     vel0, vel1, vel2, vel3;
@@ -55,8 +73,8 @@ stepgen #(W,F,T) s2(clk, stepcnt, pos2, vel2, dirtime, steptime, real_step[2], r
 stepgen #(W,F,T) s3(clk, stepcnt, pos3, vel3, dirtime, steptime, real_step[3], real_dir[3], tap);
 
 // EPP stuff
-//wire EPP_write = ~nWrite;
-//wire EPP_read = nWrite;
+// synchronizing the handshakes
+//
 reg [2:0] EPP_nWrite_reg;
 always @(posedge clk) EPP_nWrite_reg <= {EPP_nWrite_reg[1:0], nWrite};
 wire EPP_write = ~EPP_nWrite_reg[1];
@@ -72,16 +90,7 @@ wire [7:0] EPP_dataout; assign pport_data = EPP_dataout;
 
 reg [4:0] EPP_strobe_reg;
 always @(posedge clk) EPP_strobe_reg <= {EPP_strobe_reg[3:0], EPP_strobe};
-//wire EPP_strobe_edge1 = (EPP_strobe_reg[2:1]==2'b01);
 
-// reg led;
-
-//assign EPP_wait = EPP_strobe_reg[4];
-//wire[15:0] EPP_dataword = {EPP_datain, lowbyte};
-//reg[4:0] addr_reg;
-//reg[7:0] lowbyte;
-
-// the first part of the "right way" (see below @ addr_reg test)
 reg [2:0] EPP_dstrobe_reg;
 always @(posedge clk) EPP_dstrobe_reg <= {EPP_dstrobe_reg[1:0], EPP_data_strobe};
 wire EPP_dstrobe_reg_nedge = (EPP_dstrobe_reg[2:1]==2'b10);
@@ -97,41 +106,38 @@ reg[4:0] addr_reg;
 reg[7:0] lowbyte;
 
 
-always @(posedge clk)
-    //if(EPP_strobe_edge1 & EPP_write & EPP_addr_strobe) begin
+always @(posedge clk) begin
     if(EPP_write & EPP_astrobe_reg_pedge) begin
         addr_reg <= EPP_datain[4:0];
     end
-    //else if(EPP_strobe_edge1 & !EPP_addr_strobe) addr_reg <= addr_reg + 4'd1;
     else if(EPP_dstrobe_reg_nedge) begin
         addr_reg <= addr_reg + 4'd1;
     end
+end
 always @(posedge clk) begin
-	//if(EPP_strobe_edge1 & EPP_write & EPP_data_strobe) begin
-	if(EPP_dstrobe_reg_pedge & EPP_write) begin
-		if(addr_reg[3:0] == 4'd1)      vel0 <= EPP_dataword[F:0];
-		else if(addr_reg[3:0] == 4'd3) vel1 <= EPP_dataword[F:0];
-		else if(addr_reg[3:0] == 4'd5) vel2 <= EPP_dataword[F:0];
-		else if(addr_reg[3:0] == 4'd7) vel3 <= EPP_dataword[F:0];
-		else if(addr_reg[3:0] == 4'd9) begin
-			real_dout <= { EPP_datain[5:0], lowbyte };
-		end
-		else if(addr_reg[3:0] == 4'd11) begin
-			tap <= lowbyte[7:6];
-			steptime <= lowbyte[T-1:0];
+    if(EPP_dstrobe_reg_pedge & EPP_write) begin
+        if(addr_reg[3:0] == 4'd1)      vel0 <= EPP_dataword[F:0];
+        else if(addr_reg[3:0] == 4'd3) vel1 <= EPP_dataword[F:0];
+        else if(addr_reg[3:0] == 4'd5) vel2 <= EPP_dataword[F:0];
+        else if(addr_reg[3:0] == 4'd7) vel3 <= EPP_dataword[F:0];
+        else if(addr_reg[3:0] == 4'd9) begin
+            real_dout <= { EPP_datain[5:0], lowbyte };
+        end
+        else if(addr_reg[3:0] == 4'd11) begin
+            tap <= lowbyte[7:6];
+            steptime <= lowbyte[T-1:0];
 
-			Spolarity <= EPP_datain[7];
-			// EPP_datain[6] is do_enable_wdt
-			dirtime <= EPP_datain[T-1:0];
-		end
-		else lowbyte <= EPP_datain;
-	end
+            Spolarity <= EPP_datain[7];
+	    // EPP_datain[6] is do_enable_wdt
+            dirtime <= EPP_datain[T-1:0];
+        end
+        else lowbyte <= EPP_datain;
+    end
 end
 
 reg [31:0] data_buf;
 
 always @(posedge clk) begin
-    //if(EPP_strobe_edge1 & EPP_read && addr_reg[1:0] == 2'd0) begin
     if(EPP_dstrobe_reg_pedge & EPP_read && addr_reg[1:0] == 2'd0) begin
         if(addr_reg[4:2] == 3'd0) data_buf <= pos0;
         else if(addr_reg[4:2] == 3'd1) data_buf <= pos1;
@@ -142,15 +148,6 @@ always @(posedge clk) begin
     end
 end
 
-// the addr_reg test looks funny because it is auto-incremented in an always
-// block so "1" reads the low byte, "2 and "3" read middle bytes, and "0"
-// reads the high byte I have a feeling that I'm doing this in the wrong way.
-/*
-wire [7:0] data_reg = addr_reg[1:0] == 2'd1 ? data_buf[7:0] :
-                         (addr_reg[1:0] == 2'd2 ? data_buf[15:8] :
-                         (addr_reg[1:0] == 2'd3 ? data_buf[23:16] :
-                         data_buf[31:24]));
-*/
 wire [7:0] data_reg = addr_reg[1:0] == 2'd0 ? data_buf[7:0] :
                          (addr_reg[1:0] == 2'd1 ? data_buf[15:8] :
                          (addr_reg[1:0] == 2'd2 ? data_buf[23:16] :
@@ -158,10 +155,7 @@ wire [7:0] data_reg = addr_reg[1:0] == 2'd0 ? data_buf[7:0] :
                          
 wire [7:0] EPP_data_mux = data_reg;
 assign EPP_dataout = (EPP_read & EPP_wait) ? EPP_data_mux : 8'hZZ;
-// assign do_enable_wdt = EPP_strobe_edge1 & EPP_write & EPP_data_strobe & (addr_reg[3:0] == 4'd9) & EPP_datain[6];
-// assign led = do_tristate ? 1'BZ : (real_step[0] ^ real_dir[0]);
 assign led = do_tristate ? 1'bZ : (real_step[0] ^ real_dir[0]);
 assign nConfig = epp_nReset; // 1'b1;
-//assign do_enable_wdt = EPP_strobe_edge1 & EPP_write & EPP_data_strobe & (addr_reg[3:0] == 4'd9) & EPP_datain[6];
 assign do_enable_wdt = EPP_dstrobe_reg_pedge & EPP_write & (addr_reg[3:0] == 4'd9) & EPP_datain[6];
 endmodule

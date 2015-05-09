@@ -167,7 +167,7 @@ typedef struct {
 } internal;
 
 #define ONE (1<<F)
-#define MAX_STEP_RATE (1<<(F-1))
+#define MAX_STEP_RATE ((1<<F)-1)
 FUNCTION(write) {
     int r = 0;
     int i;
@@ -197,7 +197,7 @@ FUNCTION(write) {
 
     // Speed limits come from several sources
     // First limit: step waveform timings
-    fmax = 1. / PLUTO_SPEED / (2 + steplen_ticks + stepspace_ticks);
+    fmax = 1.0 / PLUTO_SPEED / (2 + steplen_ticks + stepspace_ticks);
     // Second limit: highest speed command
     if(fmax > PLUTO_FREQ / (2<<speedrange))
         fmax = PLUTO_SPEED * (2<<speedrange);
@@ -210,18 +210,18 @@ FUNCTION(write) {
     EPP_ADDR(0);
 
     for(i=0; i<4; i++) {
-	double new_position_cmd = stepgen_position_cmd(i);
-	double v = new_position_cmd - data.old_position_cmd[i];
-	double est_err = stepgen_position_fb(i) + data.old_velocity_cmd[i] * fperiod - new_position_cmd;
+        double new_position_cmd = stepgen_position_cmd(i);
+        double v = new_position_cmd - data.old_position_cmd[i];
+        double est_err = stepgen_position_fb(i) + data.old_velocity_cmd[i] * fperiod - new_position_cmd;
         double actual_max;
-	double scale_abs = abs(stepgen_scale(i));
+        double scale_abs = abs(stepgen_scale(i));
 
-	v = v - debug_2 * est_err / fperiod;
+        v = v - debug_2 * est_err / fperiod;
         if(v > 0) v = v + .5/scale_abs;
         else if(v < 0) v = v - .5/scale_abs;
 
-	data.old_position_cmd[i] = new_position_cmd;
-	data.old_velocity_cmd[i] = v;
+        data.old_position_cmd[i] = new_position_cmd;
+        data.old_velocity_cmd[i] = v;
         actual_max = fmax / scale_abs;
         if(stepgen_maxvel(i) < 0) stepgen_maxvel(i) = -stepgen_maxvel(i);
         if(stepgen_maxvel(i) != 0 && stepgen_maxvel(i) > actual_max) {
@@ -244,14 +244,14 @@ FUNCTION(write) {
             if(v < -stepgen_maxvel(i)) v = -stepgen_maxvel(i);
             if(v > stepgen_maxvel(i)) v = stepgen_maxvel(i);
         }
-	rate = v * stepgen_scale(i) * ONE * PLUTO_SPEED / (1<<speedrange);
+        rate = v*stepgen_scale(i)*ONE*PLUTO_SPEED/(1<<speedrange);
 
-	if(rate > maxrate) rate = maxrate;
-	if(rate < -maxrate) rate = -maxrate;
+        if(rate > maxrate) rate = maxrate;
+        if(rate < -maxrate) rate = -maxrate;
 
-	if(!stepgen_enable(i)) rate = 0;
+        if(!stepgen_enable(i)) rate = 0;
         if(i == 0) debug_1 = rate;
-	write16(rate);
+        write16(rate);
     }
 
     r = 0;
@@ -260,8 +260,11 @@ FUNCTION(write) {
     }
     write16(r);
 
-    r = steplen_ticks | (dirtime_ticks << 8);
-    if (stepgen_step_polarity) r |= 0x8000;
+    //r = steplen_ticks | (dirtime_ticks << 8);
+    r = steplen_ticks+stepspace_ticks | (dirtime_ticks << 8);
+    if (stepgen_step_polarity) {
+        r |= 0x8000;
+    }else r &= 0x7FFF;
     write16(r);
 }
 
@@ -276,7 +279,7 @@ FUNCTION(read) {
     for(i=0; i<4; i++) {
         int64_t count;
         double fcount;
-	int newlow;
+        int newlow;
         int reset;
         ppdata = read32();
         reset = stepgen_reset(i);
@@ -284,20 +287,20 @@ FUNCTION(read) {
             int status = inb(ioaddr+1) & 1;
             if(status) {
                 communication_error ++;
-		pluto_clear_error_register();
+                pluto_clear_error_register();
             }
             if(communication_error) { EPP_DIR_WRITE(); return; }
         }
 
-	newlow = ppdata & MASK;
+        newlow = ppdata & MASK;
 
         count = extend(data.last_count[i], newlow, W+F);
-	stepgen_velocity_fb(i) = (count - data.last_count[i]) / stepgen_scale(i) / fperiod / (1 << F);
+        stepgen_velocity_fb(i) = (count-data.last_count[i])/stepgen_scale(i)/fperiod/(1<<F);
         data.last_count[i] = count;
         if(reset) data.reset_count[i] = count;
-        fcount = (count - data.reset_count[i]) * 1. / (1<<F);
+        fcount = (count-data.reset_count[i])*1.0/(1<<F);
         stepgen_counts(i) = fcount;
-        stepgen_position_fb(i) = fcount / stepgen_scale(i);
+        stepgen_position_fb(i) = fcount/stepgen_scale(i);
 
         if(i == 0) { debug_0 = ppdata; }
     }

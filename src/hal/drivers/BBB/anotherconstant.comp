@@ -1,0 +1,52 @@
+component anotherconstant;
+pin out float out;
+param rw float value = 1.0;
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+
+#include "rtapi.h"
+#include "rtapi_bitops.h"
+#include "rtapi_app.h"
+#include "rtapi_compat.h"
+#include "hal.h"
+
+#if !defined(BUILD_SYS_USER_DSO)
+#error "This driver is for usermode threads only"
+#endif
+
+#if !defined(TARGET_PLATFORM_BEAGLEBONE)
+#error "This driver is for the BeagleBoneBlack platform only"
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#include <limits.h>	/* PATH_MAX */
+
+int test_RIP();
+
+//#define  WO_get_rtapi_config
+
+FUNCTION(_) {
+	if(test_RIP()) {
+		rtapi_print("Its RIP!\n");
+	}
+	out = value; 
+}
+
+int test_RIP() {
+	char path[PATH_MAX];
+	
+#ifndef WO_get_rtapi_config
+	get_rtapi_config(path, "RUN_IN_PLACE", 4);
+#else
+	snprintf(path, 4, "yes");
+#endif
+	
+	if (strncmp(path, "yes", 3) == 0) {
+		return 1;
+	}
+	return 0;
+}

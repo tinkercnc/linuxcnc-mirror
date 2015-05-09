@@ -1,5 +1,4 @@
-/*   This is a component of pluto_servo_rpspi for RaspberryPi , a PWM servo driver and quadrature
- *    counter over SPI for linuxcnc.
+/*   This is a component of pluto_servo/step_bbbspi for RaspberryPi to FPGA over SPI for linuxcnc.
  *    Copyright 2013 Matsche <tinker@play-pla.net>
  *                               based on GP Orcullo's picnc driver.
  *
@@ -23,8 +22,8 @@
 #define HAL_RPSPI_H
 
 				/* SPICLK = 250 MHz/(1 << SPICLKDIV) */
-#define SPICLKDIV		7		/* SPI clk divider (0-15) */
-#define SPIBUFSIZE		64		/* SPI buffer size */
+#define SPICLKDIV		6		/* SPI clk divider (0-15) */
+#define SPIBUFSIZE		20		/* SPI buffer size in bytes */
 #define BUFSIZE			(SPIBUFSIZE/4)
 
 /* Broadcom defines */

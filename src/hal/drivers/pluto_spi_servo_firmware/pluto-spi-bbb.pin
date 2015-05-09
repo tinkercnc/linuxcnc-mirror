@@ -37,9 +37,9 @@
  ------------------------------------------------------------------------------
 
 
-File Generation Date & Time: Thu Jan 23 14:13:05 2014
+File Generation Date & Time: Tue Jan 21 00:23:48 2014
 Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
-CHIP  "pluto-spi"  ASSIGNED TO AN: EP1K10TC100-3
+CHIP  "pluto-spi-bbb"  ASSIGNED TO AN: EP1K10TC100-3
 
 Pin Name/Usage               : Location  : Dir.   : I/O Standard      : Voltage : I/O Bank  : User Assignment
 -------------------------------------------------------------------------------------------------------------
@@ -119,12 +119,12 @@ TDI                          : 73        : input  :                   :         
 nCE                          : 74        : input  :                   :         :           :                
 DCLK                         : 75        : bidir  :                   :         :           :                
 DATA0                        : 76        : input  :                   :         :           :                
-MOSI                         : 77        : input  : LVTTL/LVCMOS      :         :           : Y              
-RESERVED_INPUT               : 78        :        :                   :         :           :                
+RESERVED_INPUT               : 77        :        :                   :         :           :                
+MOSI                         : 78        : input  : LVTTL/LVCMOS      :         :           : Y              
 MISO                         : 79        : output : LVTTL/LVCMOS      :         :           : Y              
-RESERVED_INPUT               : 80        :        :                   :         :           :                
-SSEL                         : 81        : input  : LVTTL/LVCMOS      :         :           : Y              
-nRESET                       : 82        : input  : LVTTL/LVCMOS      :         :           : Y              
+SCK                          : 80        : input  : LVTTL/LVCMOS      :         :           : Y              
+nRESET                       : 81        : input  : LVTTL/LVCMOS      :         :           : Y              
+SSEL                         : 82        : input  : LVTTL/LVCMOS      :         :           : Y              
 VCC_IO                       : 83        : power  :                   : 3.3V    :           :                
 RESERVED_INPUT               : 84        :        :                   :         :           :                
 RESERVED_INPUT               : 85        :        :                   :         :           :                
@@ -132,7 +132,7 @@ RESERVED_INPUT               : 86        :        :                   :         
 RESERVED_INPUT               : 87        :        :                   :         :           :                
 GND_INT                      : 88        : gnd    :                   :         :           :                
 GND+                         : 89        :        :                   :         :           :                
-SCK                          : 90        : input  : LVTTL/LVCMOS      :         :           : Y              
+GND+                         : 90        :        :                   :         :           :                
 clk                          : 91        : input  : LVTTL/LVCMOS      :         :           : Y              
 VCC_INT                      : 92        : power  :                   : 2.5V    :           :                
 din[1]                       : 93        : input  : LVTTL/LVCMOS      :         :           : Y              

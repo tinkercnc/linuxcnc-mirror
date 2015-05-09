@@ -38,9 +38,9 @@ reg [1:0] state;
 reg ones;
 wire dbit = velocity[F];
 wire pbit = (tap == 0 ? position[F] 
-	    : (tap == 1 ? position[F+1]
-	    : (tap == 2 ? position[F+2]
-	    : position[F+3])));
+			: (tap == 1 ? position[F+1]
+			: (tap == 2 ? position[F+2]
+			: position[F+3])));
 
 wire [W+F-1:0] xvelocity = {{W{velocity[F]}}, {1{velocity[F-1:0]}}};
 
@@ -63,7 +63,7 @@ always @(posedge clk) begin
 					timer <= dirtime;
 					state <= `STATE_DIRWAIT;
 				end else begin
-					timer <= timer - 1'd1;
+						timer <= timer - 1'd1;
 				end
 			end else begin
 				if(timer == 0) begin
@@ -93,7 +93,7 @@ always @(posedge clk) begin
 				timer <= timer - 1'd1;
 			end
 			if(dir == dbit) 
-				position <= position + xvelocity;
+					position <= position + xvelocity;
 		end
 	end
 end

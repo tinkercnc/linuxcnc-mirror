@@ -1,5 +1,5 @@
 //    This is a component of pluto_servo, a PWM servo driver and quadrature
-//    counter for linuxcnc
+//    counter for emc2
 //    Copyright 2006 Jeff Epler <jepler@unpythonic.net>
 //
 //    This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 //**********************************************************************
-// Open-Drain/Collector buffer
+// Open-Drain buffer
 module OC_Buff(in, out);
 input in;
 output out;
@@ -26,7 +26,7 @@ endmodule
 
 //**********************************************************************
 module pluto_servo(clk, led, nConfig, epp_nReset, pport_data, nWrite, nWait, nACK, nPE, nDataStr,
-    nAddrStr, dout, din, quadA, quadB, quadZ, up, down);
+	nAddrStr, dout, din, quadA, quadB, quadZ, up, down);
 parameter QW=14;
 input clk;
 output led, nConfig;
@@ -40,10 +40,10 @@ assign nPE = 1'b0;
 //assign nConfig = 1'b1;
 
 reg[9:0] real_dout; 
-output [9:0] dout = do_tristate ? 10'bZZZZZZZZZZ : real_dout;
-//output [9:0] dout = 10'bZZZZZZZZZZ;
+//output [9:0] dout = real_dout[9:0] ? 10'bZZZZZZZZZZ : 10'b0000000000 ;
+output [9:0] dout = 10'bZZZZZZZZZZ;
 //assign dout = real_dout;
-//OC_Buff ocout[9:0](real_dout, dout);
+OC_Buff ocout[9:0](real_dout, dout);
 
 input [7:0] din;
 input [3:0] quadA;
@@ -51,14 +51,12 @@ input [3:0] quadB;
 input [3:0] quadZ;
 
 wire[3:0] real_up;
-output [3:0] up = do_tristate ? 4'bZZZZ : real_up;
-//output [3:0] up = 4'bZZZZ;
-//OC_Buff ocup[3:0](real_up, up);
+output [3:0] up = 4'bZZZZ;
+OC_Buff ocup[3:0](real_up, up);
 
 wire[3:0] real_down;
-output [3:0] down = do_tristate ? 4'bZZZZ : real_down;
-//output [3:0] down = 4'bZZZZ;
-//OC_Buff ocdown[3:0](real_down, down);
+output [3:0] down = 4'bZZZZ;
+OC_Buff ocdown[3:0](real_down, down);
 
 reg Zpolarity;
 
@@ -156,15 +154,15 @@ always @(posedge clk) begin
     end
     /*
     else if(EPP_strobe_edge1 & !EPP_addr_strobe) begin
-        addr_reg <= addr_reg + 4'd1;
-    end
+		addr_reg <= addr_reg + 4'd1;
+	end
     */
     // the second part of the "right way"
     //else if(EPP_dstrobe_reg_nedge & !EPP_addr_strobe) begin
-    else if(EPP_dstrobe_reg_nedge) begin
-        addr_reg <= addr_reg + 4'd1;
-    end
-    
+	else if(EPP_dstrobe_reg_nedge) begin
+		addr_reg <= addr_reg + 4'd1;
+	end
+	
 end
 always @(posedge clk) begin
     //if(EPP_strobe_edge1 & EPP_write & EPP_data_strobe) begin
